@@ -29,6 +29,8 @@
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
         body { font-family: system-ui, -apple-system, sans-serif; }
+        .checkbox-wrapper input:checked + div { background-color: #4f46e5; border-color: #4f46e5; }
+        .checkbox-wrapper input:checked + div svg { display: block; }
     </style>
 </head>
 <body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 transition-colors duration-300 min-h-screen">
@@ -44,19 +46,12 @@
 
         <!-- Login Screen -->
         <div id="login-view" class="hidden min-h-screen flex items-center justify-center p-6 relative overflow-hidden">
-            <!-- Background Icons -->
-            <div class="absolute inset-0 opacity-10 dark:opacity-5 pointer-events-none">
-                <i data-lucide="utensils" class="absolute top-10 left-10 w-16 h-16 text-indigo-500"></i>
-                <i data-lucide="coffee" class="absolute bottom-20 right-10 w-12 h-12 text-emerald-500"></i>
-                <i data-lucide="star" class="absolute top-1/3 right-1/4 w-8 h-8 text-amber-500"></i>
-            </div>
-
             <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl p-8 max-w-md w-full text-center relative z-10 border border-slate-100 dark:border-slate-800">
                 <div class="mx-auto w-20 h-20 bg-indigo-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg rotate-3">
                     <i data-lucide="store" class="w-10 h-10 text-white"></i>
                 </div>
                 <h1 class="text-3xl font-black text-slate-800 dark:text-white mb-2">RestaurApp</h1>
-                <p class="text-slate-500 dark:text-slate-400 mb-8">Guarda tus rincones favoritos y descubre tu perfil foodie con IA.</p>
+                <p class="text-slate-500 dark:text-slate-400 mb-8">Guarda tus rincones favoritos.</p>
 
                 <button id="btn-google-login" class="w-full flex items-center justify-center gap-3 bg-white dark:bg-slate-800 text-slate-700 dark:text-white border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 py-3.5 rounded-xl font-bold shadow-sm mb-6 transition-all">
                     <!-- Google SVG -->
@@ -77,13 +72,17 @@
         </div>
 
         <!-- Main App View -->
-        <div id="main-view" class="hidden pb-24">
-            <!-- Header -->
-            <header class="p-4 sticky top-0 z-30 shadow-md bg-indigo-600 dark:bg-slate-900 text-white border-b dark:border-slate-800 transition-colors">
-                <div class="max-w-5xl mx-auto space-y-3">
-                    <div class="flex items-center justify-between">
+        <div id="main-view" class="hidden pb-32">
+            
+            <!-- STICKY HEADER WRAPPER (Unified Block) -->
+            <div id="sticky-header-container" class="sticky top-0 z-30 shadow-md">
+                
+                <!-- 1. Top Bar (Logo + Actions) -->
+                <div class="p-4 pt-4 pb-2 bg-indigo-600 dark:bg-slate-900 text-white transition-colors">
+                    <div class="max-w-5xl mx-auto flex items-center justify-between">
                         <div class="flex items-center gap-2">
-                            <h1 class="text-xl font-bold flex items-center gap-2">
+                            <button id="btn-back-shared" class="hidden p-1 hover:bg-white/20 rounded-full mr-1"><i data-lucide="arrow-left" class="w-6 h-6"></i></button>
+                            <h1 id="app-title" class="text-xl font-bold flex items-center gap-2">
                                 <i data-lucide="store" class="text-indigo-200"></i> RestaurApp
                             </h1>
                         </div>
@@ -94,7 +93,7 @@
                             <button id="btn-profile-ai" class="flex items-center gap-2 px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-full text-xs font-bold border border-white/20">
                                 <i data-lucide="pie-chart" class="w-4 h-4"></i> <span class="hidden sm:inline">Perfil IA</span>
                             </button>
-                            <div class="flex items-center gap-2 pl-2 border-l border-white/20">
+                            <div id="user-section" class="flex items-center gap-2 pl-2 border-l border-white/20">
                                 <img id="user-avatar" src="" class="hidden w-8 h-8 rounded-full border border-white/50">
                                 <i id="user-icon-default" data-lucide="user-circle" class="w-7 h-7 text-indigo-100 hidden"></i>
                                 <button id="btn-logout" class="p-2 rounded-full hover:bg-red-500/20 text-red-100 hover:text-red-200">
@@ -103,9 +102,11 @@
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <!-- Search & Sort -->
-                    <div class="flex gap-2">
+                <!-- 2. Search & Sort Bar (Home Only) -->
+                <div id="header-search-container" class="bg-indigo-600 dark:bg-slate-900 px-4 pb-4 transition-colors">
+                    <div class="max-w-5xl mx-auto flex gap-2">
                         <div class="relative flex-1">
                             <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-indigo-200"></i>
                             <input id="input-search" type="text" placeholder="Buscar..." class="w-full bg-indigo-700/50 dark:bg-slate-800/50 border border-indigo-500/50 dark:border-slate-600 rounded-xl pl-10 pr-10 py-2.5 text-sm text-white placeholder-indigo-200/60 focus:outline-none focus:ring-2 focus:ring-white/20">
@@ -124,46 +125,158 @@
                         </div>
                     </div>
                 </div>
-            </header>
 
-            <!-- Tabs -->
-            <div class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-[124px] z-20 overflow-x-auto scrollbar-hide">
-                <div id="categories-container" class="flex p-2 gap-2 max-w-5xl mx-auto min-w-max">
-                    <!-- Categories injected by JS -->
+                <!-- 3. Categories Bar (Home Only) -->
+                <div id="header-categories-container" class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 overflow-x-auto scrollbar-hide transition-colors">
+                    <div id="categories-container" class="flex p-2 gap-2 max-w-5xl mx-auto min-w-max">
+                        <!-- Categories injected by JS -->
+                    </div>
                 </div>
             </div>
 
-            <!-- List -->
-            <main class="max-w-5xl mx-auto p-4">
-                <div id="places-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <!-- Places injected by JS -->
-                </div>
-                
-                <div id="empty-state" class="hidden text-center py-20 opacity-50 flex flex-col items-center">
-                    <i data-lucide="search" class="w-12 h-12 mb-4 text-slate-300 dark:text-slate-600"></i>
-                    <p class="text-lg">No se encontraron sitios.</p>
-                </div>
-            </main>
+            <!-- TAB HOME LIST -->
+            <div id="tab-home">
+                <main class="max-w-5xl mx-auto p-4 pt-6">
+                    <div id="places-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Places injected by JS -->
+                    </div>
+                    
+                    <div id="empty-state" class="hidden text-center py-20 opacity-50 flex flex-col items-center">
+                        <i data-lucide="search" class="w-12 h-12 mb-4 text-slate-300 dark:text-slate-600"></i>
+                        <p class="text-lg">No se encontraron sitios.</p>
+                    </div>
+                </main>
 
-            <!-- FAB -->
-            <button id="btn-fab" class="fixed bottom-6 right-6 bg-indigo-600 hover:bg-indigo-700 text-white p-4 rounded-full shadow-lg hover:scale-105 active:scale-95 transition-all z-40">
-                <i data-lucide="plus" class="w-7 h-7"></i>
-            </button>
+                <!-- FAB -->
+                <button id="btn-fab" class="fixed bottom-24 right-6 bg-indigo-600 hover:bg-indigo-700 text-white p-4 rounded-full shadow-lg hover:scale-105 active:scale-95 transition-all z-40">
+                    <i data-lucide="plus" class="w-7 h-7"></i>
+                </button>
+            </div>
+
+            <!-- TAB SHARED -->
+            <div id="tab-shared" class="hidden max-w-5xl mx-auto p-4 pt-6 space-y-6">
+                <!-- Share Actions (Subtle Design) -->
+                <div class="flex items-center justify-between bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-indigo-50 dark:bg-indigo-900/30 p-2 rounded-lg text-indigo-600 dark:text-indigo-400">
+                            <i data-lucide="share-2" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-sm text-slate-800 dark:text-white">Compartir Lista</h3>
+                            <p class="text-xs text-slate-500">Crea enlaces para tus amigos</p>
+                        </div>
+                    </div>
+                    <button onclick="openShareWizard()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg transition-colors">
+                        Nueva Lista
+                    </button>
+                </div>
+
+                <div id="shared-history-list" class="space-y-3">
+                    <div class="text-center py-12 opacity-40">
+                        <p class="text-sm text-slate-500 dark:text-slate-400">Tus enlaces compartidos aparecerán aquí.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BOTTOM NAV -->
+            <div id="bottom-nav" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50">
+                <nav class="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md shadow-2xl border border-slate-200/50 dark:border-slate-700/50 rounded-full p-1.5 flex gap-2">
+                    <button onclick="switchView('home')" id="nav-home" class="p-3.5 rounded-full transition-all bg-indigo-100 text-indigo-600 dark:bg-indigo-900 dark:text-indigo-300">
+                        <i data-lucide="home" class="w-6 h-6"></i>
+                    </button>
+                    <button onclick="switchView('shared')" id="nav-shared" class="p-3.5 rounded-full transition-all text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
+                        <i data-lucide="share-2" class="w-6 h-6"></i>
+                    </button>
+                </nav>
+            </div>
+        </div>
+
+        <!-- MODAL: DETAILS -->
+        <div id="modal-details" class="hidden fixed inset-0 bg-black/80 z-[70] flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in">
+            <div class="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto flex flex-col relative overflow-hidden">
+                
+                <!-- Image Gallery -->
+                <div class="relative h-64 sm:h-72 w-full bg-slate-100 dark:bg-slate-800 shrink-0">
+                    <div id="detail-images" class="flex overflow-x-auto snap-x snap-mandatory h-full w-full scrollbar-hide">
+                        <!-- Images injected here -->
+                    </div>
+                    <!-- Gradients for text visibility -->
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/30 pointer-events-none"></div>
+                    
+                    <button onclick="closeDetails()" class="absolute top-4 right-4 p-2 bg-black/20 hover:bg-black/40 text-white rounded-full backdrop-blur-md transition-colors z-10"><i data-lucide="x" class="w-5 h-5"></i></button>
+
+                    <!-- Image Counter Badge -->
+                     <div id="detail-image-count" class="absolute bottom-4 right-4 px-3 py-1 bg-black/60 backdrop-blur-md rounded-full text-xs font-bold text-white flex items-center gap-1 hidden">
+                        <i data-lucide="image" class="w-3 h-3"></i> <span id="detail-image-count-text"></span>
+                     </div>
+                </div>
+
+                <div class="p-6 space-y-6">
+                    <!-- Header Info -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-start">
+                             <span id="detail-type" class="px-2.5 py-1 bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300 rounded-lg text-[10px] font-bold uppercase tracking-wider">Restaurante</span>
+                             <div class="flex items-center gap-1.5 bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-500 px-2.5 py-1 rounded-lg text-xs font-bold">
+                                <i data-lucide="star" class="w-3 h-3 fill-current"></i> <span id="detail-rating">0</span>/5
+                             </div>
+                        </div>
+                        <h2 id="detail-name" class="text-3xl font-black text-slate-900 dark:text-white leading-tight">Nombre del Sitio</h2>
+                    </div>
+
+                    <!-- Metadata Grid -->
+                    <div class="grid grid-cols-2 gap-4 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800">
+                        <div class="flex flex-col gap-1">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase">Fecha Visita</span>
+                            <div class="flex items-center gap-2 text-slate-700 dark:text-slate-200 text-sm font-medium">
+                                <i data-lucide="calendar" class="w-4 h-4 text-indigo-500"></i>
+                                <span id="detail-date">...</span>
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-1">
+                             <span class="text-[10px] font-bold text-slate-400 uppercase">Ubicación</span>
+                            <div class="flex items-center gap-2 text-slate-700 dark:text-slate-200 text-sm font-medium">
+                                <i data-lucide="map-pin" class="w-4 h-4 text-indigo-500"></i>
+                                <span id="detail-address" class="truncate">...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tags -->
+                    <div id="detail-tags-section" class="grid grid-cols-1 gap-4">
+                        <!-- Good/Bad tags injected here -->
+                    </div>
+
+                    <!-- Comment -->
+                    <div id="detail-comment-section" class="hidden">
+                        <h3 class="text-sm font-bold text-slate-900 dark:text-white mb-2">Tu Reseña</h3>
+                        <div class="relative bg-white dark:bg-slate-800 p-4 rounded-xl border-l-4 border-indigo-500 shadow-sm">
+                            <p id="detail-comment" class="text-slate-600 dark:text-slate-300 italic leading-relaxed text-sm break-words whitespace-pre-wrap"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Footer -->
+                <div class="p-6 pt-0 mt-auto" id="detail-actions">
+                     <button onclick="editFromDetails()" class="w-full bg-slate-900 dark:bg-indigo-600 hover:bg-slate-800 dark:hover:bg-indigo-700 text-white py-3.5 rounded-xl font-bold shadow-lg transition-colors flex items-center justify-center gap-2">
+                        <i data-lucide="pencil" class="w-4 h-4"></i> Editar Detalles
+                     </button>
+                </div>
+            </div>
         </div>
 
         <!-- MODAL: ADD/EDIT -->
-        <div id="modal-form" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+        <div id="modal-form" class="hidden fixed inset-0 bg-black/50 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
             <div class="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto flex flex-col">
                 <div class="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center sticky top-0 bg-white dark:bg-slate-900 z-10">
-                    <h2 id="modal-title" class="text-lg font-bold">Nuevo Sitio</h2>
-                    <button id="btn-close-modal" class="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full"><i data-lucide="x" class="w-6 h-6"></i></button>
+                    <h2 id="modal-title" class="text-lg font-bold text-slate-800 dark:text-white">Nuevo Sitio</h2>
+                    <button id="btn-close-modal" class="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full"><i data-lucide="x" class="w-6 h-6 text-slate-500"></i></button>
                 </div>
                 <form id="place-form" class="p-6 space-y-5">
                     <input type="hidden" id="edit-id">
                     
                     <!-- Main Image -->
                     <div class="space-y-2">
-                        <label class="text-xs font-semibold text-slate-500 uppercase">Foto Portada</label>
+                        <label class="text-xs font-semibold text-slate-500 uppercase">Foto</label>
                         <div class="relative group h-48 w-full border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-xl overflow-hidden bg-slate-50 dark:bg-slate-800">
                             <img id="preview-img-0" class="hidden w-full h-full object-cover">
                             <div id="upload-placeholder-0" class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
@@ -172,10 +285,8 @@
                             </div>
                             <input type="file" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer" onchange="handleImageUpload(this, 0)">
                             <button type="button" id="btn-remove-img-0" class="hidden absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full z-20"><i data-lucide="x" class="w-4 h-4"></i></button>
-                            
-                            <!-- AI Analyze Button -->
                             <button type="button" id="btn-analyze-ai" class="hidden absolute bottom-2 left-2 right-2 bg-indigo-600/90 text-white text-xs font-bold py-2 rounded-lg backdrop-blur-sm flex items-center justify-center gap-2 z-20">
-                                <i data-lucide="sparkles" class="w-3 h-3"></i> Analizar con IA
+                                <i data-lucide="sparkles" class="w-3 h-3"></i> Analizar
                             </button>
                         </div>
                     </div>
@@ -183,13 +294,16 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="space-y-1">
                             <label class="text-xs font-semibold text-slate-500 uppercase">Nombre</label>
-                            <input type="text" id="input-name" required class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <input type="text" id="input-name" required class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-800 dark:text-white">
                         </div>
                         <div class="space-y-1">
                             <label class="text-xs font-semibold text-slate-500 uppercase">Tipo</label>
-                            <select id="input-type" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <select id="input-type" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-800 dark:text-white">
                                 <!-- Options populated by JS -->
                             </select>
+                            
+                            <!-- Custom Type Input -->
+                            <input type="text" id="input-custom-type" class="hidden w-full mt-2 p-2.5 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-300 dark:border-indigo-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-indigo-700 dark:text-indigo-300 placeholder-indigo-400 dark:placeholder-indigo-500/50" placeholder="Escribe el nombre de la categoría...">
                         </div>
                     </div>
 
@@ -197,7 +311,7 @@
                         <label class="text-xs font-semibold text-slate-500 uppercase">Dirección</label>
                         <div class="relative">
                             <i data-lucide="map-pin" class="absolute left-3 top-3 w-4 h-4 text-slate-400"></i>
-                            <input type="text" id="input-address" class="w-full p-2.5 pl-10 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg">
+                            <input type="text" id="input-address" class="w-full p-2.5 pl-10 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-white">
                         </div>
                     </div>
 
@@ -205,11 +319,11 @@
                         <label class="text-xs font-semibold text-slate-500 uppercase">Rating</label>
                         <div class="flex items-center gap-2 bg-slate-50 dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-700 justify-center">
                             <div id="star-rating-container" class="flex gap-1"></div>
-                            <span id="rating-value" class="font-bold ml-2">0/5</span>
+                            <span id="rating-value" class="font-bold ml-2 text-slate-800 dark:text-white">0/5</span>
                         </div>
                     </div>
 
-                    <!-- AI Tags Section -->
+                    <!-- Tags -->
                     <div class="bg-indigo-50 dark:bg-indigo-900/20 p-4 rounded-xl border border-indigo-100 dark:border-indigo-800/30">
                         <div class="flex justify-between items-center mb-3">
                             <h3 class="text-sm font-bold text-indigo-800 dark:text-indigo-300 flex items-center gap-2">
@@ -227,6 +341,36 @@
                         </div>
                     </div>
 
+                    <!-- Evidence Photos -->
+                    <div class="space-y-2">
+                         <label class="text-xs font-semibold text-slate-500 uppercase flex justify-between">
+                            Evidencias <span class="text-[10px] font-normal normal-case opacity-70">Máx 2 fotos</span>
+                        </label>
+                        <div class="grid grid-cols-2 gap-3">
+                            <!-- Photo 1 (Index 1) -->
+                            <div class="relative group h-24 w-full border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-xl overflow-hidden bg-slate-50 dark:bg-slate-800">
+                                <img id="preview-img-1" class="hidden w-full h-full object-cover">
+                                <div id="upload-placeholder-1" class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-slate-400">
+                                    <i data-lucide="camera" class="w-5 h-5 mb-1"></i>
+                                    <span class="text-[10px]">Foto 1</span>
+                                </div>
+                                <input type="file" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer" onchange="handleImageUpload(this, 1)">
+                                <button type="button" id="btn-remove-img-1" class="hidden absolute top-1 right-1 bg-red-500 text-white p-0.5 rounded-full z-20"><i data-lucide="x" class="w-3 h-3"></i></button>
+                            </div>
+
+                            <!-- Photo 2 (Index 2) -->
+                            <div class="relative group h-24 w-full border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-xl overflow-hidden bg-slate-50 dark:bg-slate-800">
+                                <img id="preview-img-2" class="hidden w-full h-full object-cover">
+                                <div id="upload-placeholder-2" class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-slate-400">
+                                    <i data-lucide="camera" class="w-5 h-5 mb-1"></i>
+                                    <span class="text-[10px]">Foto 2</span>
+                                </div>
+                                <input type="file" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer" onchange="handleImageUpload(this, 2)">
+                                <button type="button" id="btn-remove-img-2" class="hidden absolute top-1 right-1 bg-red-500 text-white p-0.5 rounded-full z-20"><i data-lucide="x" class="w-3 h-3"></i></button>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="space-y-1">
                         <div class="flex justify-between items-end mb-1">
                             <label class="text-xs font-semibold text-slate-500 uppercase">Comentario</label>
@@ -234,7 +378,7 @@
                                 <i data-lucide="wand-2" class="w-3 h-3"></i> Mejorar
                             </button>
                         </div>
-                        <textarea id="input-comment" rows="3" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg"></textarea>
+                        <textarea id="input-comment" rows="3" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-white"></textarea>
                     </div>
 
                     <button type="submit" class="w-full bg-indigo-600 text-white py-3.5 rounded-xl font-bold shadow-lg">Guardar Sitio</button>
@@ -242,19 +386,107 @@
             </div>
         </div>
 
+        <!-- MODAL: SHARE WIZARD -->
+        <div id="modal-share-wizard" class="hidden fixed inset-0 bg-black/60 z-[70] flex items-center justify-center p-4 backdrop-blur-sm">
+            <div class="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+                
+                <!-- Step 1: Categories -->
+                <div id="share-step-1" class="flex flex-col h-full">
+                    <div class="p-6 border-b border-slate-100 dark:border-slate-800 flex-shrink-0">
+                        <div class="flex justify-between items-center mb-2">
+                            <h2 class="text-lg font-bold text-slate-800 dark:text-white">Selecciona Secciones</h2>
+                            <button onclick="closeShareWizard()" class="p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800"><i data-lucide="x" class="w-5 h-5 text-slate-500"></i></button>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <p class="text-xs text-slate-500">¿Qué categorías quieres incluir?</p>
+                            <button onclick="toggleSelectAllCats()" class="text-xs font-bold text-indigo-600 bg-indigo-50 dark:bg-indigo-900/30 px-3 py-1 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors">Seleccionar Todas</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Fixed height scrolling container to fix scroll issues -->
+                    <div class="p-4 overflow-y-auto space-y-2 h-[300px] bg-slate-50/50 dark:bg-slate-800/30" id="share-cat-list">
+                        <!-- Filled by JS -->
+                    </div>
+                    
+                    <div class="p-6 border-t border-slate-100 dark:border-slate-800 flex-shrink-0">
+                        <button onclick="goToShareStep2()" class="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold">Siguiente</button>
+                    </div>
+                </div>
+
+                <!-- Step 2: Places -->
+                <div id="share-step-2" class="hidden flex flex-col h-full">
+                    <div class="p-6 border-b border-slate-100 dark:border-slate-800 flex-shrink-0">
+                        <div class="flex justify-between items-center mb-2">
+                            <button onclick="goToShareStep1()" class="flex items-center text-sm font-bold text-slate-500 hover:text-indigo-600"><i data-lucide="arrow-left" class="w-4 h-4 mr-1"></i> Atrás</button>
+                            <button id="btn-select-all-places" onclick="toggleSelectAllShare()" class="text-xs font-bold text-indigo-600 bg-indigo-50 dark:bg-indigo-900/30 px-3 py-1 rounded-lg">Seleccionar Todos</button>
+                        </div>
+                        <h2 class="text-lg font-bold text-slate-800 dark:text-white">Selecciona Sitios</h2>
+                    </div>
+                    
+                    <!-- Fixed height scrolling container -->
+                    <div class="p-4 overflow-y-auto space-y-2 h-[300px] bg-slate-50/50 dark:bg-slate-800/30" id="share-place-list">
+                        <!-- Filled by JS -->
+                    </div>
+                    
+                    <div class="p-6 border-t border-slate-100 dark:border-slate-800 flex-shrink-0">
+                         <button onclick="goToShareStep3()" class="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2">
+                            Siguiente <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 3: Name List (NEW) -->
+                <div id="share-step-3" class="hidden flex flex-col h-full">
+                     <div class="p-6 border-b border-slate-100 dark:border-slate-800 flex-shrink-0">
+                        <div class="flex items-center mb-4">
+                            <button onclick="goToShareStep2()" class="flex items-center text-sm font-bold text-slate-500 hover:text-indigo-600"><i data-lucide="arrow-left" class="w-4 h-4 mr-1"></i> Atrás</button>
+                        </div>
+                        <div class="text-center">
+                             <div class="w-16 h-16 bg-indigo-50 dark:bg-indigo-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4 text-indigo-600 dark:text-indigo-400">
+                                <i data-lucide="edit-3" class="w-8 h-8"></i>
+                            </div>
+                            <h2 class="text-xl font-bold text-slate-800 dark:text-white mb-2">Dale nombre a tu lista</h2>
+                            <p class="text-sm text-slate-500">Ej: "Favoritos de Madrid", "Ruta de Tacos"</p>
+                        </div>
+                    </div>
+
+                    <div class="p-8 flex-1 flex flex-col justify-center">
+                        <input type="text" id="share-list-name-input" placeholder="Escribe un nombre..." class="w-full p-4 text-lg text-center font-bold bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-2xl focus:border-indigo-500 focus:ring-0 outline-none text-slate-800 dark:text-white placeholder-slate-300">
+                    </div>
+
+                    <div class="p-6 border-t border-slate-100 dark:border-slate-800 flex-shrink-0">
+                        <button onclick="finalizeShare()" id="btn-generate-link" class="w-full bg-emerald-600 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-emerald-200 dark:shadow-none">
+                            Generar Enlace <i data-lucide="link" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Result -->
+                <div id="share-step-result" class="hidden flex flex-col h-full items-center justify-center p-8 text-center">
+                    <div class="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-4">
+                        <i data-lucide="check" class="w-6 h-6"></i>
+                    </div>
+                    <h2 class="text-xl font-bold mb-2 text-slate-800 dark:text-white">¡Enlace listo!</h2>
+                    
+                    <div class="w-full bg-slate-100 dark:bg-slate-800 p-3 rounded-xl flex items-center gap-2 mb-6 border border-slate-200 dark:border-slate-700">
+                        <input id="share-final-link" readonly class="bg-transparent flex-1 text-xs font-mono outline-none text-slate-600 dark:text-slate-300 truncate">
+                        <button onclick="copyShareLink()" class="p-2 bg-white dark:bg-slate-700 rounded-lg shadow-sm hover:text-indigo-600"><i data-lucide="copy" class="w-4 h-4"></i></button>
+                    </div>
+
+                    <button onclick="closeShareWizard()" class="text-sm font-bold text-slate-500 hover:text-slate-800 dark:hover:text-white">Cerrar</button>
+                </div>
+            </div>
+        </div>
+
         <!-- MODAL: DOMAIN ERROR -->
-        <div id="modal-domain-error" class="hidden fixed inset-0 bg-slate-900 p-6 z-[60] flex items-center justify-center">
+        <div id="modal-domain-error" class="hidden fixed inset-0 bg-slate-900 p-6 z-[80] flex items-center justify-center">
             <div class="bg-white dark:bg-slate-900 rounded-3xl p-8 max-w-lg w-full text-center border border-red-100 dark:border-red-900">
                 <div class="mx-auto w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mb-6">
                     <i data-lucide="shield-alert" class="w-8 h-8"></i>
                 </div>
                 <h2 class="text-xl font-bold mb-4 dark:text-white">Dominio No Autorizado</h2>
-                <p class="text-sm text-slate-600 dark:text-slate-300 mb-6">
-                    Firebase ha bloqueado este dominio de vista previa. 
-                    <br><strong>Copia esta URL y agrégala en Auth > Settings > Domains:</strong>
-                </p>
                 <div class="bg-slate-100 dark:bg-slate-800 p-3 rounded-lg flex items-center gap-2 mb-6">
-                    <code id="domain-code" class="text-xs break-all flex-1 text-left font-mono">...</code>
+                    <code id="domain-code" class="text-xs break-all flex-1 text-left font-mono text-slate-600 dark:text-slate-300">...</code>
                     <button onclick="copyDomain()" class="p-2"><i data-lucide="copy" class="w-4 h-4"></i></button>
                 </div>
                 <div class="flex flex-col gap-3">
@@ -264,44 +496,21 @@
             </div>
         </div>
 
-        <!-- MODAL: PROFILE AI -->
-        <div id="modal-profile" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-            <div class="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-md shadow-2xl overflow-hidden relative">
-                <div class="bg-gradient-to-r from-indigo-500 to-purple-600 p-6 text-white text-center">
-                    <button onclick="document.getElementById('modal-profile').classList.add('hidden')" class="absolute top-4 right-4"><i data-lucide="x" class="w-5 h-5"></i></button>
-                    <div class="mx-auto w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mb-4"><i data-lucide="sparkles" class="w-8 h-8 text-yellow-300"></i></div>
-                    <h2 class="text-2xl font-bold">Tu Perfil Foodie</h2>
-                </div>
-                <div id="profile-content" class="p-6 text-center space-y-4">
-                    <!-- Content injected -->
-                    <div class="animate-pulse">Analizando tus gustos...</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- HIDDEN INPUTS FOR EXTRA IMAGES (Simplified logic) -->
+        <!-- HIDDEN INPUTS -->
         <input type="file" id="file-input-hidden" class="hidden" accept="image/*">
 
-    </div> <!-- End App -->
+    </div>
 
     <!-- LOGIC SCRIPTS -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, query, onSnapshot, serverTimestamp, deleteDoc, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, query, onSnapshot, serverTimestamp, deleteDoc, updateDoc, doc, getDoc, setDoc, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         // --- CONFIG ---
-        const firebaseConfig = {
-            apiKey: "AIzaSyCN6r1SI_546p7WdxxP28q3WAQWki7zkyI",
-            authDomain: "restaurapp-5fe96.firebaseapp.com",
-            projectId: "restaurapp-5fe96",
-            storageBucket: "restaurapp-5fe96.firebasestorage.app",
-            messagingSenderId: "612330319072",
-            appId: "1:612330319072:web:a85e321306dd2b4ea73485",
-            measurementId: "G-FC6RL56RNR"
-        };
-        const appId = 'default-app-id'; // Simplified context
-        const apiKey = ""; // Gemini API Key (Empty per instructions)
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const apiKey = ""; 
 
         // Init Firebase
         const app = initializeApp(firebaseConfig);
@@ -315,6 +524,18 @@
         let currentFilter = 'all';
         let currentSearch = '';
         let editingPlaceId = null;
+        let isSharedViewMode = false;
+        let unsubscribePlaces = null;
+        let activePlaceId = null; // For details modal
+        
+        // Share Wizard State
+        let shareSelectedCats = [];
+        let shareSelectedPlaces = [];
+        
+        // AI Recommendations & Current Suggestions
+        let currentSuggestions = { good: [], bad: [] };
+        let customCategories = [];
+
         let formData = {
             name: '', type: 'Restaurante', address: '', date: new Date().toISOString().split('T')[0],
             rating: 0, comment: '', goodTags: [], badTags: [], images: ['', '', '']
@@ -327,23 +548,149 @@
             {id: 'Cafeteria', label: 'Café', icon: 'coffee'},
             {id: 'Entretenimiento', label: 'Ocio', icon: 'tree-pine'}
         ];
+        
+        const AI_RECOMMENDATIONS_FALLBACK = {
+          Restaurante: {
+            good: ["Sabor auténtico", "Servicio rápido", "Ambiente romántico", "Porciones generosas", "Carta de vinos"],
+            bad: ["Muy ruidoso", "Servicio lento", "Precios altos", "Pocas mesas", "Difícil estacionar"]
+          },
+          FoodTruck: {
+            good: ["Sabor callejero", "Económico", "Servicio exprés", "Originalidad"],
+            bad: ["Sin asientos", "Fila larga", "Solo efectivo", "Poca higiene"]
+          },
+          Bar: {
+            good: ["Buena música", "Cocteles creativos", "Pista de baile", "Happy Hour"],
+            bad: ["Bebidas aguadas", "Entrada costosa", "Demasiada gente", "Baños sucios"]
+          },
+          Cafeteria: {
+            good: ["Café de especialidad", "WiFi rápido", "Silencioso", "Postres frescos"],
+            bad: ["Café quemado", "Poco espacio", "Mesas inestables", "Música molesta"]
+          },
+          Entretenimiento: {
+            good: ["Divertido", "Familiar", "Instalaciones nuevas", "Buen precio/calidad"],
+            bad: ["Filas eternas", "Personal grosero", "Mantenimiento pobre"]
+          },
+          Otro: {
+            good: ["Atención amable", "Lugar limpio", "Buen precio"],
+            bad: ["Mala ubicación", "Sucio", "Caro", "Peligroso"]
+          }
+        };
+
+        // --- UTILS ---
+        const compressImage = (file) => {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        const MAX_WIDTH = 600; // Reduced from 800
+                        const MAX_HEIGHT = 600;
+                        let width = img.width;
+                        let height = img.height;
+
+                        if (width > height) {
+                            if (width > MAX_WIDTH) {
+                                height *= MAX_WIDTH / width;
+                                width = MAX_WIDTH;
+                            }
+                        } else {
+                            if (height > MAX_HEIGHT) {
+                                width *= MAX_HEIGHT / height;
+                                height = MAX_HEIGHT;
+                            }
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+                        
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        
+                        const dataUrl = canvas.toDataURL('image/jpeg', 0.6); // Reduced quality
+                        resolve(dataUrl);
+                    };
+                    img.onerror = (err) => reject(err);
+                };
+                reader.onerror = (err) => reject(err);
+            });
+        };
+
+        // --- NAVIGATION ---
+        window.switchView = (view) => {
+            const homeTab = document.getElementById('tab-home');
+            const sharedTab = document.getElementById('tab-shared');
+            const navHome = document.getElementById('nav-home');
+            const navShared = document.getElementById('nav-shared');
+
+            // Toggle visibility of Header elements
+            const searchContainer = document.getElementById('header-search-container');
+            const catContainer = document.getElementById('header-categories-container');
+
+            if (view === 'home') {
+                homeTab.classList.remove('hidden');
+                sharedTab.classList.add('hidden');
+                
+                searchContainer.classList.remove('hidden');
+                catContainer.classList.remove('hidden');
+
+                navHome.classList.add('bg-indigo-100', 'text-indigo-600', 'dark:bg-indigo-900', 'dark:text-indigo-300');
+                navHome.classList.remove('text-slate-400', 'hover:bg-slate-100', 'dark:hover:bg-slate-800');
+                
+                navShared.classList.remove('bg-indigo-100', 'text-indigo-600', 'dark:bg-indigo-900', 'dark:text-indigo-300');
+                navShared.classList.add('text-slate-400', 'hover:bg-slate-100', 'dark:hover:bg-slate-800');
+            } else {
+                homeTab.classList.add('hidden');
+                sharedTab.classList.remove('hidden');
+                
+                searchContainer.classList.add('hidden');
+                catContainer.classList.add('hidden');
+
+                navShared.classList.add('bg-indigo-100', 'text-indigo-600', 'dark:bg-indigo-900', 'dark:text-indigo-300');
+                navShared.classList.remove('text-slate-400', 'hover:bg-slate-100', 'dark:hover:bg-slate-800');
+                
+                navHome.classList.remove('bg-indigo-100', 'text-indigo-600', 'dark:bg-indigo-900', 'dark:text-indigo-300');
+                navHome.classList.add('text-slate-400', 'hover:bg-slate-100', 'dark:hover:bg-slate-800');
+            }
+        };
 
         // --- AUTH ---
-        onAuthStateChanged(auth, (user) => {
+        onAuthStateChanged(auth, async (user) => {
             const loading = document.getElementById('loading-screen');
             const loginView = document.getElementById('login-view');
             const mainView = document.getElementById('main-view');
             
+            const params = new URLSearchParams(window.location.search);
+            const sharedId = params.get('shared');
+
+            if (sharedId) {
+                if (!user) { try { await signInAnonymously(auth); return; } catch(e){} }
+                isSharedViewMode = true;
+                loadSharedList(sharedId);
+                loginView.classList.add('hidden');
+                mainView.classList.remove('hidden');
+                document.getElementById('btn-fab').classList.add('hidden');
+                document.getElementById('user-section').classList.add('hidden');
+                document.getElementById('bottom-nav').classList.add('hidden');
+                document.getElementById('app-title').innerHTML = `<span class="text-sm font-normal">Lista Compartida</span>`;
+                loading.classList.add('hidden');
+                return;
+            }
+
             if (user) {
                 currentUser = user;
                 loginView.classList.add('hidden');
                 mainView.classList.remove('hidden');
                 setupRealtimeListener();
+                setupCategoriesListener(); // NEW: Load custom categories
                 updateUserHeader();
             } else {
                 currentUser = null;
                 loginView.classList.remove('hidden');
                 mainView.classList.add('hidden');
+                if (unsubscribePlaces) { unsubscribePlaces(); unsubscribePlaces = null; }
             }
             loading.classList.add('hidden');
         });
@@ -360,11 +707,9 @@
             try {
                 await signInWithPopup(auth, provider);
             } catch (error) {
-                console.error("Auth Error", error);
                 const errStr = (error.code + error.message).toLowerCase();
                 if (errStr.includes('unauthorized-domain')) {
-                    const domain = window.location.hostname;
-                    document.getElementById('domain-code').innerText = domain;
+                    document.getElementById('domain-code').innerText = window.location.hostname;
                     document.getElementById('modal-domain-error').classList.remove('hidden');
                 } else if (!errStr.includes('closed-by-user')) {
                     alert("Error login: " + error.message);
@@ -390,49 +735,225 @@
         }
 
         // --- FIRESTORE ---
+        async function loadSharedList(shareId) {
+            try {
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'shared_lists', shareId);
+                const snap = await getDoc(docRef);
+                if (snap.exists()) {
+                    const data = snap.data();
+                    places = data.items || [];
+                    document.getElementById('app-title').innerHTML = `<i data-lucide="share-2" class="w-5 h-5"></i> ${data.categoryName || 'Compartido'}`;
+                    lucide.createIcons();
+                    renderPlaces();
+                } else { alert("Lista no encontrada"); }
+            } catch(e) { console.error(e); alert("Error cargando lista"); }
+        }
+
         function setupRealtimeListener() {
             if (!currentUser) return;
+            if (unsubscribePlaces) unsubscribePlaces();
+
             const q = query(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'places'));
-            onSnapshot(q, (snapshot) => {
+            
+            // Add error callback to onSnapshot
+            unsubscribePlaces = onSnapshot(q, (snapshot) => {
                 places = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 renderPlaces();
+            }, (error) => {
+                console.error("Firestore Error:", error);
+                if (error.code === 'permission-denied') {
+                    // Show a specific error message for permissions
+                   alert("Error de Permisos: No se pudo acceder a la base de datos.\n\nSi estás usando tu propio proyecto de Firebase, asegúrate de que las 'Reglas' de Firestore permitan lectura/escritura.\n\nRegla sugerida para pruebas:\nallow read, write: if request.auth != null;");
+                }
+            });
+        }
+        
+        // NEW: Load custom categories from DB
+        function setupCategoriesListener() {
+            if (!currentUser) return;
+            const q = query(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'custom_categories'), orderBy('name'));
+            onSnapshot(q, (snapshot) => {
+                customCategories = snapshot.docs.map(doc => ({ 
+                    id: doc.data().name, 
+                    label: doc.data().name, 
+                    icon: 'map-pin' 
+                }));
+                // If modal is open, re-render to show new cats
+                if (!document.getElementById('modal-form').classList.contains('hidden')) {
+                     renderTypeOptions(formData.type);
+                }
+                // Update main filter list too
+                renderCategories();
             });
         }
 
-        // --- GEMINI API ---
-        async function callGemini(prompt, imageBase64) {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
-            const parts = [{ text: prompt }];
-            if (imageBase64) {
-                const b64 = imageBase64.split(',')[1] || imageBase64;
-                parts.push({ inlineData: { mimeType: "image/jpeg", data: b64 } });
-            }
-            try {
-                const res = await fetch(url, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ contents: [{ parts }] })
-                });
-                const data = await res.json();
-                return data.candidates?.[0]?.content?.parts?.[0]?.text;
-            } catch (e) { console.error(e); return null; }
+        // --- SHARE WIZARD ---
+        window.openShareWizard = () => {
+            document.getElementById('modal-share-wizard').classList.remove('hidden');
+            shareSelectedCats = [];
+            shareSelectedPlaces = [];
+            goToShareStep1();
         }
+        window.closeShareWizard = () => document.getElementById('modal-share-wizard').classList.add('hidden');
 
-        // --- UI RENDERING ---
-        function renderCategories() {
-            const container = document.getElementById('categories-container');
-            container.innerHTML = defaultCategories.map(cat => `
-                <button onclick="setCategory('${cat.id}')" 
-                    class="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors
-                    ${currentFilter === cat.id ? 'bg-indigo-100 text-indigo-700 border-indigo-200 dark:bg-indigo-900/50 dark:text-indigo-300 dark:border-indigo-800 border' : 'text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'}">
-                    <i data-lucide="${cat.icon}" class="w-4 h-4"></i> ${cat.label}
-                </button>
+        window.goToShareStep1 = () => {
+            document.getElementById('share-step-1').classList.remove('hidden');
+            document.getElementById('share-step-2').classList.add('hidden');
+            document.getElementById('share-step-3').classList.add('hidden');
+            document.getElementById('share-step-result').classList.add('hidden');
+            
+            const list = document.getElementById('share-cat-list');
+            
+            // Generate list including "Select All" functionality context if needed
+            // But we have a specific button for it now.
+            const allCats = [...defaultCategories.filter(c => c.id !== 'all'), ...customCategories];
+
+            list.innerHTML = allCats.map(c => `
+                <label class="checkbox-wrapper flex items-center p-3 rounded-xl border border-slate-200 dark:border-slate-700 cursor-pointer hover:bg-white dark:hover:bg-slate-700 transition-colors bg-white dark:bg-slate-900">
+                    <input type="checkbox" class="hidden" value="${c.id}" onchange="toggleShareCat('${c.id}')" ${shareSelectedCats.includes(c.id) ? 'checked' : ''}>
+                    <div class="w-5 h-5 rounded border border-slate-300 dark:border-slate-500 mr-3 flex items-center justify-center text-white">
+                        <i data-lucide="check" class="w-3 h-3 hidden"></i>
+                    </div>
+                    <div class="flex items-center gap-2 font-medium text-slate-800 dark:text-white">
+                        <i data-lucide="${c.icon}" class="w-4 h-4 text-slate-400"></i> ${c.label}
+                    </div>
+                </label>
             `).join('');
             lucide.createIcons();
         }
 
-        window.setCategory = (id) => { currentFilter = id; renderCategories(); renderPlaces(); };
+        window.toggleShareCat = (id) => {
+            const idx = shareSelectedCats.indexOf(id);
+            if (idx > -1) shareSelectedCats.splice(idx, 1); else shareSelectedCats.push(id);
+            // Visual update handled by CSS input:checked
+        }
 
+        window.toggleSelectAllCats = () => {
+             const allCats = [...defaultCategories.filter(c => c.id !== 'all'), ...customCategories];
+             
+             if (shareSelectedCats.length === allCats.length) {
+                 shareSelectedCats = []; // Deselect All
+             } else {
+                 shareSelectedCats = allCats.map(c => c.id); // Select All
+             }
+             goToShareStep1(); // Re-render to show changes
+        }
+
+        window.goToShareStep2 = () => {
+            if (shareSelectedCats.length === 0) return alert("Selecciona al menos una categoría");
+            document.getElementById('share-step-1').classList.add('hidden');
+            document.getElementById('share-step-3').classList.add('hidden');
+            document.getElementById('share-step-2').classList.remove('hidden');
+
+            const filteredPlaces = places.filter(p => shareSelectedCats.includes(p.type));
+            const list = document.getElementById('share-place-list');
+            
+            if (filteredPlaces.length === 0) {
+                list.innerHTML = `<div class="text-center p-8 text-slate-400">No hay sitios en estas categorías.</div>`;
+                return;
+            }
+
+            // GROUP BY CATEGORY
+            const placesByCat = {};
+            shareSelectedCats.forEach(catId => {
+                const catLabel = [...defaultCategories, ...customCategories].find(c => c.id === catId)?.label || catId;
+                const items = filteredPlaces.filter(p => p.type === catId);
+                if (items.length > 0) placesByCat[catLabel] = items;
+            });
+
+            let html = '';
+            for (const [catLabel, items] of Object.entries(placesByCat)) {
+                html += `<h3 class="text-xs font-bold text-slate-400 uppercase mt-4 mb-2 ml-1">${catLabel}</h3>`;
+                html += items.map(p => `
+                    <label class="checkbox-wrapper flex items-center p-3 rounded-xl border border-slate-200 dark:border-slate-700 cursor-pointer hover:bg-white dark:hover:bg-slate-700 transition-colors bg-white dark:bg-slate-900 mb-2">
+                        <input type="checkbox" class="hidden place-checkbox" value="${p.id}" onchange="toggleSharePlace('${p.id}')" ${shareSelectedPlaces.includes(p.id) ? 'checked' : ''}>
+                        <div class="w-5 h-5 rounded border border-slate-300 dark:border-slate-500 mr-3 flex items-center justify-center text-white flex-shrink-0">
+                            <i data-lucide="check" class="w-3 h-3 hidden"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="font-bold truncate text-sm text-slate-800 dark:text-white">${p.name}</div>
+                            <div class="text-xs text-slate-400 truncate">${p.address || 'Sin dirección'}</div>
+                        </div>
+                        <div class="text-xs font-bold bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded text-slate-500">${p.rating}★</div>
+                    </label>
+                `).join('');
+            }
+            
+            list.innerHTML = html;
+            lucide.createIcons();
+            
+            // Update Select All Button Text
+            const btnAll = document.getElementById('btn-select-all-places');
+            if (filteredPlaces.length > 0 && shareSelectedPlaces.length === filteredPlaces.length) {
+                btnAll.innerText = "Deseleccionar Todos";
+            } else {
+                btnAll.innerText = "Seleccionar Todos";
+            }
+        }
+
+        window.toggleSharePlace = (id) => {
+            const idx = shareSelectedPlaces.indexOf(id);
+            if (idx > -1) shareSelectedPlaces.splice(idx, 1); else shareSelectedPlaces.push(id);
+             // Visual update handled by CSS input:checked
+        }
+
+        window.toggleSelectAllShare = () => {
+            const filteredPlaces = places.filter(p => shareSelectedCats.includes(p.type));
+            if (shareSelectedPlaces.length === filteredPlaces.length) {
+                shareSelectedPlaces = []; 
+            } else {
+                shareSelectedPlaces = filteredPlaces.map(p => p.id);
+            }
+            goToShareStep2(); // Re-render to show changes
+        }
+
+        window.goToShareStep3 = () => {
+             if (shareSelectedPlaces.length === 0) return alert("Selecciona al menos un sitio");
+             document.getElementById('share-step-2').classList.add('hidden');
+             document.getElementById('share-step-3').classList.remove('hidden');
+             // Focus on input
+             setTimeout(() => document.getElementById('share-list-name-input').focus(), 100);
+        }
+
+        window.finalizeShare = async () => {
+            const btn = document.getElementById('btn-generate-link');
+            btn.innerHTML = `<i data-lucide="loader-2" class="animate-spin w-4 h-4"></i> Generando...`;
+            lucide.createIcons();
+
+            const listName = document.getElementById('share-list-name-input').value.trim() || "Mis Favoritos";
+
+            try {
+                const itemsToShare = places.filter(p => shareSelectedPlaces.includes(p.id));
+                const shareId = crypto.randomUUID();
+                
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'shared_lists', shareId), {
+                    items: itemsToShare,
+                    categoryName: listName,
+                    createdAt: serverTimestamp(),
+                    owner: currentUser.uid
+                });
+
+                const shareUrl = `${window.location.href.split('?')[0]}?shared=${shareId}`;
+                document.getElementById('share-final-link').value = shareUrl;
+                
+                document.getElementById('share-step-3').classList.add('hidden');
+                document.getElementById('share-step-result').classList.remove('hidden');
+            } catch (e) {
+                console.error(e);
+                alert("Error generando enlace: " + e.message);
+            }
+            btn.innerHTML = `Generar Enlace <i data-lucide="link" class="w-4 h-4"></i>`;
+            lucide.createIcons();
+        }
+
+        window.copyShareLink = () => {
+            const input = document.getElementById('share-final-link');
+            input.select();
+            document.execCommand('copy');
+            alert("Enlace copiado!");
+        }
+
+        // --- MAIN RENDER ---
         function renderPlaces() {
             const grid = document.getElementById('places-grid');
             const empty = document.getElementById('empty-state');
@@ -442,16 +963,8 @@
                 const searchLower = currentSearch.toLowerCase();
                 const matchSearch = !currentSearch || 
                     p.name.toLowerCase().includes(searchLower) || 
-                    p.address?.toLowerCase().includes(searchLower);
+                    (p.address && p.address.toLowerCase().includes(searchLower));
                 return matchCat && matchSearch;
-            });
-
-            // Sort
-            filtered.sort((a, b) => {
-                if (sortOption === 'date-desc') return new Date(b.date) - new Date(a.date);
-                if (sortOption === 'date-asc') return new Date(a.date) - new Date(b.date);
-                if (sortOption === 'rating-desc') return b.rating - a.rating;
-                return a.rating - b.rating;
             });
 
             if (filtered.length === 0) {
@@ -463,47 +976,190 @@
             empty.classList.add('hidden');
             grid.innerHTML = filtered.map(p => {
                 const img = (p.images && p.images[0]) ? p.images[0] : null;
-                const goodTags = (p.goodTags || []).slice(0, 2);
+                const goodTags = (p.goodTags || []).slice(0, 3);
+                const badTags = (p.badTags || []).slice(0, 3);
                 
+                // Truncate comment to 50 chars with ...
+                const commentPreview = p.comment && p.comment.length > 50 
+                    ? p.comment.substring(0, 50) + '...' 
+                    : (p.comment || '');
+
                 return `
-                <div onclick="openEdit('${p.id}')" class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200/60 dark:border-slate-800 overflow-hidden group cursor-pointer relative hover:-translate-y-1 transition-transform">
-                    <div class="h-48 w-full bg-slate-100 dark:bg-slate-800 relative overflow-hidden">
-                        ${img ? `<img src="${img}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">` : 
-                        `<div class="w-full h-full flex items-center justify-center text-slate-300"><i data-lucide="image" class="w-10 h-10"></i></div>`}
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent"></div>
-                        <div class="absolute top-3 left-3 px-2 py-1 bg-white/90 dark:bg-slate-900/90 backdrop-blur rounded text-[10px] font-bold uppercase">${p.type}</div>
-                        <div class="absolute top-3 right-3 flex items-center gap-1 bg-white/90 dark:bg-slate-900/90 backdrop-blur px-2 py-1 rounded-full text-xs font-bold">
-                            <i data-lucide="star" class="w-3 h-3 text-amber-400 fill-amber-400"></i> ${p.rating}
-                        </div>
+                <div onclick="openDetails('${p.id}')" class="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-200/50 dark:border-slate-800 overflow-hidden group hover:shadow-xl transition-all duration-300 relative flex flex-col h-full cursor-pointer">
+                    <!-- Image Header -->
+                    <div class="h-48 relative overflow-hidden flex-shrink-0">
+                         ${img ? `<img src="${img}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">` : 
+                         `<div class="w-full h-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-300"><i data-lucide="image" class="w-10 h-10"></i></div>`}
+                         
+                         <!-- Overlay Gradient -->
+                         <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/10 opacity-60"></div>
+                         
+                         <!-- Badges -->
+                         <div class="absolute top-3 left-3">
+                            <span class="px-2.5 py-1 bg-white/95 dark:bg-slate-900/90 backdrop-blur-md text-indigo-600 dark:text-indigo-400 text-[10px] font-bold uppercase tracking-wider rounded-lg shadow-sm border border-black/5 dark:border-white/10">
+                                ${p.type}
+                            </span>
+                         </div>
+                         <div class="absolute top-3 right-3 flex items-center gap-1 bg-white/95 dark:bg-slate-900/90 backdrop-blur-md px-2 py-1 rounded-full shadow-sm border border-black/5 dark:border-white/10">
+                            <i data-lucide="star" class="w-3 h-3 text-amber-400 fill-amber-400"></i>
+                            <span class="text-xs font-bold text-slate-700 dark:text-slate-200">${p.rating}</span>
+                         </div>
+
+                         <!-- Delete Button (Top Right) -->
+                         ${!isSharedViewMode ? `
+                         <button onclick="event.stopPropagation(); deletePlace('${p.id}')" class="absolute top-3 right-16 p-1.5 bg-white/95 dark:bg-slate-900/90 text-red-500 rounded-full shadow-sm border border-black/5 dark:border-white/10 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors z-20">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                         </button>` : ''}
                     </div>
-                    <div class="p-4">
-                        <h3 class="font-bold text-lg leading-tight mb-1 dark:text-white">${p.name}</h3>
-                        <div class="flex items-center text-xs text-slate-400 mb-3">
-                            <i data-lucide="calendar" class="w-3 h-3 mr-1"></i> ${new Date(p.date).toLocaleDateString()}
+
+                    <!-- Body -->
+                    <div class="p-5 flex-1 flex flex-col">
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="text-xl font-bold text-slate-900 dark:text-white leading-tight line-clamp-1">${p.name}</h3>
                         </div>
-                        ${p.comment ? `<p class="text-xs text-slate-600 dark:text-slate-400 italic line-clamp-2 mb-3">"${p.comment}"</p>` : ''}
-                        <div class="flex gap-1 overflow-hidden">
-                            ${goodTags.map(t => `<span class="px-2 py-0.5 bg-green-50 text-green-700 text-[10px] font-bold rounded border border-green-100 whitespace-nowrap">${t}</span>`).join('')}
+                        
+                        <!-- Fixed Compact Metadata -->
+                        <div class="flex flex-col gap-0.5 text-xs text-slate-500 dark:text-slate-400 mb-3">
+                            <span class="flex items-center gap-1.5">
+                                <i data-lucide="calendar" class="w-3 h-3 opacity-70"></i> 
+                                ${new Date(p.date).toLocaleDateString(undefined, {month:'short', day:'numeric', year: 'numeric'})}
+                            </span>
+                            <span class="flex items-center gap-1.5 truncate">
+                                <i data-lucide="map-pin" class="w-3 h-3 opacity-70"></i> 
+                                ${p.address || 'Sin dirección'}
+                            </span>
                         </div>
+
+                        <!-- Tags Section -->
+                        <div class="mb-4 space-y-2">
+                            ${goodTags.length > 0 ? `
+                            <div class="flex flex-wrap gap-1.5">
+                                ${goodTags.map(t => `<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800/50 flex items-center gap-1"><i data-lucide="thumbs-up" class="w-2 h-2"></i> ${t}</span>`).join('')}
+                            </div>` : ''}
+                            
+                            ${badTags.length > 0 ? `
+                            <div class="flex flex-wrap gap-1.5">
+                                ${badTags.map(t => `<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400 border border-red-100 dark:border-red-800/50 flex items-center gap-1"><i data-lucide="thumbs-down" class="w-2 h-2"></i> ${t}</span>`).join('')}
+                            </div>` : ''}
+                        </div>
+
+                        ${commentPreview ? `
+                        <div class="mt-auto relative bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800/50">
+                            <i data-lucide="quote" class="w-3 h-3 text-indigo-300 absolute top-2 left-2 transform -scale-x-100"></i>
+                            <p class="text-xs text-slate-600 dark:text-slate-400 italic line-clamp-2 pl-4">"${commentPreview}"</p>
+                        </div>` : ''}
                     </div>
-                    <button onclick="event.stopPropagation(); deletePlace('${p.id}')" class="absolute top-14 right-3 p-2 bg-white text-red-500 rounded-full shadow hover:bg-red-50 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <i data-lucide="trash-2" class="w-4 h-4"></i>
-                    </button>
                 </div>
                 `;
             }).join('');
             lucide.createIcons();
         }
 
+        // --- DETAILS MODAL LOGIC ---
+        window.openDetails = (id) => {
+            const p = places.find(x => x.id === id);
+            if (!p) return;
+            activePlaceId = id;
+
+            document.getElementById('detail-name').innerText = p.name;
+            document.getElementById('detail-type').innerText = p.type;
+            document.getElementById('detail-rating').innerText = p.rating;
+            document.getElementById('detail-date').innerText = new Date(p.date).toLocaleDateString(undefined, {weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'});
+            document.getElementById('detail-address').innerText = p.address || 'Sin dirección registrada';
+            
+            // Images
+            const imagesContainer = document.getElementById('detail-images');
+            const imageCountBadge = document.getElementById('detail-image-count');
+            let imgsHtml = '';
+            let validImages = (p.images || []).filter(img => img);
+            
+            if (validImages.length > 0) {
+                imgsHtml = validImages.map(img => `
+                    <div class="w-full flex-shrink-0 h-full snap-center relative">
+                        <img src="${img}" class="w-full h-full object-cover">
+                    </div>
+                `).join('');
+                
+                // Show counter if more than 1 image
+                if (validImages.length > 1) {
+                    document.getElementById('detail-image-count-text').innerText = `${validImages.length} Fotos`;
+                    imageCountBadge.classList.remove('hidden');
+                } else {
+                    imageCountBadge.classList.add('hidden');
+                }
+
+            } else {
+                 imgsHtml = `<div class="w-full h-full flex items-center justify-center text-slate-400"><i data-lucide="image" class="w-16 h-16"></i></div>`;
+                 imageCountBadge.classList.add('hidden');
+            }
+            imagesContainer.innerHTML = imgsHtml;
+
+            // Tags
+            const tagsContainer = document.getElementById('detail-tags-section');
+            let tagsHtml = '';
+            if (p.goodTags && p.goodTags.length > 0) {
+                tagsHtml += `
+                <div>
+                    <h4 class="text-xs font-bold text-emerald-600 uppercase mb-2 flex items-center gap-1"><i data-lucide="thumbs-up" class="w-3 h-3"></i> Lo Mejor</h4>
+                    <div class="flex flex-wrap gap-2">
+                        ${p.goodTags.map(t => `<span class="px-3 py-1 bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 rounded-lg text-xs font-bold border border-emerald-100 dark:border-emerald-800/50">${t}</span>`).join('')}
+                    </div>
+                </div>`;
+            }
+            if (p.badTags && p.badTags.length > 0) {
+                tagsHtml += `
+                <div class="mt-3">
+                    <h4 class="text-xs font-bold text-red-600 uppercase mb-2 flex items-center gap-1"><i data-lucide="thumbs-down" class="w-3 h-3"></i> A Mejorar</h4>
+                    <div class="flex flex-wrap gap-2">
+                        ${p.badTags.map(t => `<span class="px-3 py-1 bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400 rounded-lg text-xs font-bold border border-red-100 dark:border-red-800/50">${t}</span>`).join('')}
+                    </div>
+                </div>`;
+            }
+            tagsContainer.innerHTML = tagsHtml || '<p class="text-xs text-slate-400 italic">Sin etiquetas registradas.</p>';
+
+            // Comment
+            const commentSec = document.getElementById('detail-comment-section');
+            if (p.comment) {
+                document.getElementById('detail-comment').innerText = `"${p.comment}"`;
+                commentSec.classList.remove('hidden');
+            } else {
+                commentSec.classList.add('hidden');
+            }
+
+            // Edit Button Visibility
+            const actionsDiv = document.getElementById('detail-actions');
+            if (isSharedViewMode) {
+                actionsDiv.classList.add('hidden');
+            } else {
+                actionsDiv.classList.remove('hidden');
+            }
+
+            document.getElementById('modal-details').classList.remove('hidden');
+            lucide.createIcons();
+        };
+
+        window.closeDetails = () => {
+            document.getElementById('modal-details').classList.add('hidden');
+        };
+
+        window.editFromDetails = () => {
+            closeDetails();
+            openEdit(activePlaceId);
+        };
+
         // --- FORM LOGIC ---
         const modal = document.getElementById('modal-form');
         const form = document.getElementById('place-form');
-
-        // Populate Type Select
         const typeSelect = document.getElementById('input-type');
-        typeSelect.innerHTML = defaultCategories.filter(c => c.id !== 'all').map(c => `<option value="${c.id}">${c.label}</option>`).join('');
+        
+        function renderTypeOptions(selectedValue) {
+            const allCats = [...defaultCategories.filter(c => c.id !== 'all'), ...customCategories];
+            const html = allCats.map(c => `<option value="${c.id}" ${c.id === selectedValue ? 'selected' : ''}>${c.label}</option>`).join('') +
+                         `<option value="__custom__">➕ Otro...</option>`;
+            typeSelect.innerHTML = html;
+            if (selectedValue) typeSelect.value = selectedValue;
+        }
 
-        // Star Rating Logic
         function renderStars(rating) {
             const container = document.getElementById('star-rating-container');
             container.innerHTML = [1,2,3,4,5].map(i => `
@@ -516,25 +1172,92 @@
         }
         window.setRating = (r) => { formData.rating = r; renderStars(r); };
 
-        // Tags Logic
+        function updateSuggestions(type) {
+            const fallback = AI_RECOMMENDATIONS_FALLBACK[type] || AI_RECOMMENDATIONS_FALLBACK['Otro'];
+            currentSuggestions = {
+                good: [...fallback.good],
+                bad: [...fallback.bad]
+            };
+            renderFormTags();
+        }
+
+        // Handle input type change - Show input if custom
+        document.getElementById('input-type').addEventListener('change', async (e) => {
+            const val = e.target.value;
+            const customInput = document.getElementById('input-custom-type');
+            
+            if (val === '__custom__') {
+                customInput.classList.remove('hidden');
+                customInput.focus();
+                formData.type = ''; // Clear type until entered
+            } else {
+                customInput.classList.add('hidden');
+                formData.type = val;
+                updateSuggestions(val);
+            }
+        });
+
+        function fillForm() {
+            if (document.getElementById('input-name')) document.getElementById('input-name').value = formData.name;
+            
+            // Check if type is custom or exists in list
+            const allCats = [...defaultCategories, ...customCategories];
+            const typeExists = allCats.some(c => c.id === formData.type);
+            const customInput = document.getElementById('input-custom-type');
+            
+            renderTypeOptions(formData.type); // Render list
+
+            if (typeExists || formData.type === 'Restaurante') {
+                document.getElementById('input-type').value = formData.type;
+                customInput.classList.add('hidden');
+                customInput.value = '';
+            } else {
+                // It's a new custom type not yet saved or loaded?
+                document.getElementById('input-type').value = '__custom__';
+                customInput.classList.remove('hidden');
+                customInput.value = formData.type;
+            }
+            
+            if (document.getElementById('input-address')) document.getElementById('input-address').value = formData.address || '';
+            if (document.getElementById('input-comment')) document.getElementById('input-comment').value = formData.comment || '';
+            setRating(formData.rating || 0);
+            
+            if (!editingPlaceId) updateSuggestions(formData.type);
+
+            renderFormTags();
+            updateImagePreview(0);
+            updateImagePreview(1);
+            updateImagePreview(2);
+            
+            if (formData.images && formData.images[0]) {
+                document.getElementById('btn-analyze-ai').classList.remove('hidden');
+            } else {
+                document.getElementById('btn-analyze-ai').classList.add('hidden');
+            }
+        }
+
         function renderFormTags() {
             const goodC = document.getElementById('tags-good-container');
             const badC = document.getElementById('tags-bad-container');
             
+            const allGood = [...new Set([...currentSuggestions.good, ...formData.goodTags])];
+            const allBad = [...new Set([...currentSuggestions.bad, ...formData.badTags])];
+
             const renderTag = (t, type) => `
                 <button type="button" onclick="toggleFormTag('${t}', '${type}')" 
                     class="text-xs px-3 py-1 rounded-full border transition-all ${
                         (type === 'good' ? formData.goodTags : formData.badTags).includes(t) 
                         ? (type === 'good' ? 'bg-green-600 text-white border-green-600' : 'bg-red-600 text-white border-red-600') 
-                        : 'bg-white dark:bg-slate-800 text-slate-500 border-slate-200'
+                        : 'bg-white dark:bg-slate-800 text-slate-500 border-slate-200 dark:border-slate-700'
                     }">
                     ${t}
                 </button>
             `;
-            // Normally would load suggestions from AI, simplified here to show selected
-            goodC.innerHTML = formData.goodTags.map(t => renderTag(t, 'good')).join('');
-            badC.innerHTML = formData.badTags.map(t => renderTag(t, 'bad')).join('');
+            
+            goodC.innerHTML = allGood.map(t => renderTag(t, 'good')).join('');
+            badC.innerHTML = allBad.map(t => renderTag(t, 'bad')).join('');
         }
+
         window.toggleFormTag = (t, type) => {
             const arr = type === 'good' ? formData.goodTags : formData.badTags;
             const idx = arr.indexOf(t);
@@ -542,66 +1265,12 @@
             renderFormTags();
         }
 
-        // Open/Close
-        document.getElementById('btn-fab').onclick = () => {
-            editingPlaceId = null;
-            formData = { name: '', type: 'Restaurante', address: '', date: new Date().toISOString().split('T')[0], rating: 0, comment: '', goodTags: [], badTags: [], images: ['', '', ''] };
-            document.getElementById('modal-title').innerText = 'Nuevo Sitio';
-            document.getElementById('edit-id').value = '';
-            fillForm();
-            modal.classList.remove('hidden');
-        };
-        
-        window.openEdit = (id) => {
-            const p = places.find(x => x.id === id);
-            if (!p) return;
-            editingPlaceId = id;
-            formData = { ...p, images: p.images || ['', '', ''] };
-            document.getElementById('modal-title').innerText = 'Editar Sitio';
-            document.getElementById('edit-id').value = id;
-            fillForm();
-            modal.classList.remove('hidden');
-        }
-
-        document.getElementById('btn-close-modal').onclick = () => modal.classList.add('hidden');
-
-        function fillForm() {
-            document.getElementById('input-name').value = formData.name;
-            document.getElementById('input-type').value = formData.type;
-            document.getElementById('input-address').value = formData.address || '';
-            document.getElementById('input-comment').value = formData.comment || '';
-            setRating(formData.rating);
-            renderFormTags();
-            updateImagePreview(0);
-            
-            // Show/Hide AI Analyze button based on image presence
-            if (formData.images[0]) {
-                document.getElementById('btn-analyze-ai').classList.remove('hidden');
-            } else {
-                document.getElementById('btn-analyze-ai').classList.add('hidden');
-            }
-        }
-
-        // Image Handling
-        window.handleImageUpload = async (input, idx) => {
-            const file = input.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    formData.images[idx] = e.target.result; // Should use compression in prod
-                    updateImagePreview(idx);
-                    if (idx === 0) document.getElementById('btn-analyze-ai').classList.remove('hidden');
-                };
-                reader.readAsDataURL(file);
-            }
-        };
-
         function updateImagePreview(idx) {
             const img = document.getElementById(`preview-img-${idx}`);
             const ph = document.getElementById(`upload-placeholder-${idx}`);
             const btn = document.getElementById(`btn-remove-img-${idx}`);
             
-            if (formData.images[idx]) {
+            if (formData.images && formData.images[idx]) {
                 img.src = formData.images[idx];
                 img.classList.remove('hidden');
                 ph.classList.add('hidden');
@@ -612,34 +1281,142 @@
                 btn.classList.add('hidden');
             }
         }
-        
+
+        window.handleImageUpload = async (input, idx) => {
+            const file = input.files[0];
+            if (file) {
+                try {
+                    const compressed = await compressImage(file);
+                    formData.images[idx] = compressed;
+                    updateImagePreview(idx);
+                    if (idx === 0) document.getElementById('btn-analyze-ai').classList.remove('hidden');
+                } catch (err) {
+                    console.error("Error compressing image", err);
+                    alert("Error al procesar la imagen.");
+                }
+            }
+        };
+
         document.getElementById('btn-remove-img-0').onclick = () => {
             formData.images[0] = '';
             updateImagePreview(0);
             document.getElementById('btn-analyze-ai').classList.add('hidden');
         };
 
-        // Submit
+        document.getElementById('btn-remove-img-1').onclick = () => {
+            formData.images[1] = '';
+            updateImagePreview(1);
+        };
+        document.getElementById('btn-remove-img-2').onclick = () => {
+            formData.images[2] = '';
+            updateImagePreview(2);
+        };
+
+        document.getElementById('btn-fab').onclick = () => {
+            editingPlaceId = null;
+            formData = { name: '', type: 'Restaurante', address: '', date: new Date().toISOString().split('T')[0], rating: 0, comment: '', goodTags: [], badTags: [], images: ['', '', ''] };
+            document.getElementById('modal-title').innerText = 'Nuevo Sitio';
+            document.getElementById('edit-id').value = '';
+            renderTypeOptions(); // Ensure custom types are loaded
+            fillForm();
+            modal.classList.remove('hidden');
+        };
+        
+        window.openEdit = (id) => {
+            if (isSharedViewMode) return;
+            const p = places.find(x => x.id === id);
+            if (!p) return;
+            editingPlaceId = id;
+            formData = { ...p, images: p.images || ['', '', ''] };
+            document.getElementById('modal-title').innerText = 'Editar Sitio';
+            document.getElementById('edit-id').value = id;
+            renderTypeOptions(); // Ensure custom types are loaded
+            fillForm();
+            modal.classList.remove('hidden');
+        }
+        document.getElementById('btn-close-modal').onclick = () => modal.classList.add('hidden');
+
         form.onsubmit = async (e) => {
             e.preventDefault();
-            if (!currentUser) return;
+            
+            if (!currentUser) {
+                const tryLogin = confirm("Necesitas iniciar sesión para guardar. ¿Deseas entrar como invitado?");
+                if (tryLogin) {
+                    try {
+                        await signInAnonymously(auth);
+                        return;
+                    } catch (err) {
+                        alert("Error de autenticación: " + err.message);
+                        return;
+                    }
+                } else {
+                    return;
+                }
+            }
             
             formData.name = document.getElementById('input-name').value;
-            formData.type = document.getElementById('input-type').value;
+            // Handle Custom Type Logic
+            let finalType = formData.type;
+            const typeSelectVal = document.getElementById('input-type').value;
+            
+            if (typeSelectVal === '__custom__') {
+                const customName = document.getElementById('input-custom-type').value.trim();
+                if (!customName) return alert("Por favor escribe un nombre para la categoría.");
+                finalType = customName;
+                
+                // Save custom category if new
+                const exists = defaultCategories.some(c => c.id === finalType) || customCategories.some(c => c.id === finalType);
+                if (!exists) {
+                     try {
+                         await addDoc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'custom_categories'), {
+                             name: finalType,
+                             createdAt: serverTimestamp()
+                         });
+                     } catch(err) { console.error("Error saving category", err); }
+                }
+            } else {
+                finalType = typeSelectVal;
+            }
+            formData.type = finalType;
+            
             formData.address = document.getElementById('input-address').value;
             formData.comment = document.getElementById('input-comment').value;
 
+            // Calculate size
+            const payloadSize = new Blob([JSON.stringify(formData)]).size;
+            if (payloadSize > 950000) { // ~950KB limit
+                alert("Las imágenes son demasiado grandes. Por favor, elimina alguna o usa fotos más pequeñas.");
+                return;
+            }
+            
+            const btnSubmit = form.querySelector('button[type="submit"]');
+            btnSubmit.disabled = true;
+            btnSubmit.innerHTML = `<i data-lucide="loader-2" class="animate-spin w-5 h-5 inline"></i> Guardando...`;
+            lucide.createIcons();
+
             try {
+                const collectionRef = collection(db, 'artifacts', appId, 'users', currentUser.uid, 'places');
+                
                 if (editingPlaceId) {
-                    await updateDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'places', editingPlaceId), formData);
+                    await updateDoc(doc(collectionRef, editingPlaceId), formData);
                 } else {
-                    await addDoc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'places'), {
+                    await addDoc(collectionRef, {
                         ...formData,
                         createdAt: serverTimestamp()
                     });
                 }
                 modal.classList.add('hidden');
-            } catch (err) { alert("Error guardando: " + err.message); }
+            } catch (err) { 
+                console.error("Save Error:", err);
+                if (err.code === 'resource-exhausted') {
+                    alert("Error: Has superado el límite de cuota diario de Firebase o la imagen es demasiado grande. Intenta mañana o usa imágenes más pequeñas.");
+                } else {
+                    alert("Error guardando: " + err.message); 
+                }
+            } finally {
+                btnSubmit.disabled = false;
+                btnSubmit.innerText = "Guardar Sitio";
+            }
         };
 
         window.deletePlace = async (id) => {
@@ -650,104 +1427,28 @@
             }
         };
 
-        // --- AI FEATURES ---
-        document.getElementById('btn-analyze-ai').onclick = async () => {
-            const btn = document.getElementById('btn-analyze-ai');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = `<i data-lucide="loader-2" class="animate-spin w-3 h-3"></i> Analizando...`;
+        // UI Helpers & Init
+        function renderCategories() { /* ... kept simple ... */ 
+            const container = document.getElementById('categories-container');
+            const allCats = [...defaultCategories, ...customCategories]; // Include custom cats in main filter
+            
+            container.innerHTML = allCats.map(cat => `
+                <button onclick="setCategory('${cat.id}')" class="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${currentFilter === cat.id ? 'bg-indigo-100 text-indigo-700 border-indigo-200 dark:bg-indigo-900/50 dark:text-indigo-300 dark:border-indigo-800 border' : 'text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'}">
+                    <i data-lucide="${cat.icon}" class="w-4 h-4"></i> ${cat.label}
+                </button>`).join('');
             lucide.createIcons();
-            
-            try {
-                const prompt = `Analiza esta imagen de restaurante/comida. Devuelve SOLO un JSON: { "name": "posible nombre o null", "type": "Restaurante/Bar/Cafeteria", "rating": 4, "goodTags": ["tag1", "tag2"], "comment": "breve descripcion visual" }`;
-                const jsonStr = await callGemini(prompt, formData.images[0]);
-                const data = JSON.parse(jsonStr.replace(/```json|```/g, '').trim());
-                
-                if (data.name) document.getElementById('input-name').value = data.name;
-                if (data.type) document.getElementById('input-type').value = data.type;
-                if (data.rating) setRating(data.rating);
-                if (data.comment) document.getElementById('input-comment').value = data.comment;
-                if (data.goodTags) {
-                    formData.goodTags = data.goodTags;
-                    renderFormTags();
-                }
-            } catch (e) { alert("No se pudo analizar la imagen."); }
-            btn.innerHTML = originalText;
-            lucide.createIcons();
-        };
-
-        document.getElementById('btn-generate-tags').onclick = async () => {
-            const name = document.getElementById('input-name').value;
-            const type = document.getElementById('input-type').value;
-            if (!name) return alert("Escribe un nombre primero");
-            
-            const btn = document.getElementById('btn-generate-tags');
-            btn.innerText = "...";
-            try {
-                const res = await callGemini(`Genera 3 tags buenos y 3 malos cortos para "${name}" (${type}). JSON: {"good": [], "bad": []}`);
-                const data = JSON.parse(res.replace(/```json|```/g, '').trim());
-                formData.goodTags = data.good;
-                formData.badTags = data.bad;
-                renderFormTags();
-            } catch(e) {}
-            btn.innerText = "Generar";
-        };
-
-        document.getElementById('btn-enhance-comment').onclick = async () => {
-            const txt = document.getElementById('input-comment');
-            if (txt.value.length < 5) return;
-            const res = await callGemini(`Mejora esta reseña de restaurante para que suene profesional y divertida: "${txt.value}"`);
-            if (res) txt.value = res.trim();
-        };
-
-        document.getElementById('btn-profile-ai').onclick = async () => {
-            const modalP = document.getElementById('modal-profile');
-            const content = document.getElementById('profile-content');
-            modalP.classList.remove('hidden');
-            
-            if (places.length === 0) {
-                content.innerHTML = "Agrega sitios para generar tu perfil.";
-                return;
-            }
-
-            const history = places.map(p => `${p.name} (${p.type}, ${p.rating}*)`).join(", ");
-            const res = await callGemini(`Genera perfil foodie breve basado en: ${history}. HTML simple con <h3>Titulo</h3> y <p>Descripcion</p> y <p><strong>Recomendación:</strong> ...</p>`);
-            content.innerHTML = res || "Error generando perfil.";
-        };
-
-        // --- MISC ---
+        }
+        window.setCategory = (id) => { currentFilter = id; renderCategories(); renderPlaces(); };
+        window.copyDomain = () => { navigator.clipboard.writeText(document.getElementById('domain-code').innerText); alert("Copiado!"); };
         document.getElementById('btn-theme-toggle').onclick = () => {
             document.documentElement.classList.toggle('dark');
-            const isDark = document.documentElement.classList.contains('dark');
-            document.getElementById('icon-theme').setAttribute('data-lucide', isDark ? 'sun' : 'moon');
             lucide.createIcons();
-        };
-
-        document.getElementById('input-search').oninput = (e) => {
-            currentSearch = e.target.value;
-            document.getElementById('btn-clear-search').classList.toggle('hidden', !currentSearch);
-            renderPlaces();
-        };
-        document.getElementById('btn-clear-search').onclick = () => {
-            document.getElementById('input-search').value = '';
-            currentSearch = '';
-            document.getElementById('btn-clear-search').classList.add('hidden');
-            renderPlaces();
-        };
-        
-        document.getElementById('select-sort').onchange = (e) => {
-            window.sortOption = e.target.value; // Store in window or state variable
-            renderPlaces();
-        };
-
-        window.copyDomain = () => {
-            navigator.clipboard.writeText(document.getElementById('domain-code').innerText);
-            alert("Dominio copiado. Agrégalo en Firebase Console.");
         };
 
         // Init
         renderCategories();
+        renderTypeOptions(); // Initial render
         lucide.createIcons();
-
     </script>
 </body>
 </html>
