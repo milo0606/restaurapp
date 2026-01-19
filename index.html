@@ -74,12 +74,10 @@
         <!-- Main App View -->
         <div id="main-view" class="hidden pb-32">
             
-            <!-- STICKY HEADER WRAPPER (Unified Block) -->
-            <div id="sticky-header-container" class="sticky top-0 z-30 shadow-md">
-                
-                <!-- 1. Top Bar (Logo + Actions) -->
-                <div class="p-4 pt-4 pb-2 bg-indigo-600 dark:bg-slate-900 text-white transition-colors">
-                    <div class="max-w-5xl mx-auto flex items-center justify-between">
+            <!-- HEADER -->
+            <header class="p-4 sticky top-0 z-30 shadow-md bg-indigo-600 dark:bg-slate-900 text-white border-b dark:border-slate-800 transition-colors">
+                <div class="max-w-5xl mx-auto space-y-3">
+                    <div class="flex items-center justify-between">
                         <div class="flex items-center gap-2">
                             <button id="btn-back-shared" class="hidden p-1 hover:bg-white/20 rounded-full mr-1"><i data-lucide="arrow-left" class="w-6 h-6"></i></button>
                             <h1 id="app-title" class="text-xl font-bold flex items-center gap-2">
@@ -103,9 +101,12 @@
                         </div>
                     </div>
                 </div>
+            </header>
 
-                <!-- 2. Search & Sort Bar (Home Only) -->
-                <div id="header-search-container" class="bg-indigo-600 dark:bg-slate-900 px-4 pb-4 transition-colors">
+            <!-- TAB HOME -->
+            <div id="tab-home">
+                <!-- Search & Sort -->
+                <div id="header-search-container" class="bg-indigo-600 dark:bg-slate-900 px-4 pb-4 sticky top-[72px] z-20">
                     <div class="max-w-5xl mx-auto flex gap-2">
                         <div class="relative flex-1">
                             <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-indigo-200"></i>
@@ -126,17 +127,15 @@
                     </div>
                 </div>
 
-                <!-- 3. Categories Bar (Home Only) -->
-                <div id="header-categories-container" class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 overflow-x-auto scrollbar-hide transition-colors">
+                <!-- Categories -->
+                <div id="header-categories-container" class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-[136px] z-20 overflow-x-auto scrollbar-hide">
                     <div id="categories-container" class="flex p-2 gap-2 max-w-5xl mx-auto min-w-max">
                         <!-- Categories injected by JS -->
                     </div>
                 </div>
-            </div>
 
-            <!-- TAB HOME LIST -->
-            <div id="tab-home">
-                <main class="max-w-5xl mx-auto p-4 pt-6">
+                <!-- List -->
+                <main class="max-w-5xl mx-auto p-4">
                     <div id="places-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         <!-- Places injected by JS -->
                     </div>
@@ -397,7 +396,10 @@
                             <h2 class="text-lg font-bold text-slate-800 dark:text-white">Selecciona Secciones</h2>
                             <button onclick="closeShareWizard()" class="p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800"><i data-lucide="x" class="w-5 h-5 text-slate-500"></i></button>
                         </div>
-                        <p class="text-xs text-slate-500">¿Qué categorías quieres incluir?</p>
+                        <div class="flex justify-between items-center">
+                            <p class="text-xs text-slate-500">¿Qué categorías quieres incluir?</p>
+                            <button onclick="toggleSelectAllCats()" class="text-xs font-bold text-indigo-600 bg-indigo-50 dark:bg-indigo-900/30 px-3 py-1 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors">Seleccionar Todas</button>
+                        </div>
                     </div>
                     
                     <!-- Fixed height scrolling container to fix scroll issues -->
@@ -415,7 +417,7 @@
                     <div class="p-6 border-b border-slate-100 dark:border-slate-800 flex-shrink-0">
                         <div class="flex justify-between items-center mb-2">
                             <button onclick="goToShareStep1()" class="flex items-center text-sm font-bold text-slate-500 hover:text-indigo-600"><i data-lucide="arrow-left" class="w-4 h-4 mr-1"></i> Atrás</button>
-                            <button onclick="toggleSelectAllShare()" class="text-xs font-bold text-indigo-600 bg-indigo-50 dark:bg-indigo-900/30 px-3 py-1 rounded-lg">Seleccionar Todos</button>
+                            <button id="btn-select-all-places" onclick="toggleSelectAllShare()" class="text-xs font-bold text-indigo-600 bg-indigo-50 dark:bg-indigo-900/30 px-3 py-1 rounded-lg">Seleccionar Todos</button>
                         </div>
                         <h2 class="text-lg font-bold text-slate-800 dark:text-white">Selecciona Sitios</h2>
                     </div>
@@ -426,7 +428,33 @@
                     </div>
                     
                     <div class="p-6 border-t border-slate-100 dark:border-slate-800 flex-shrink-0">
-                        <button onclick="finalizeShare()" id="btn-generate-link" class="w-full bg-emerald-600 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2">
+                         <button onclick="goToShareStep3()" class="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2">
+                            Siguiente <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 3: Name List (NEW) -->
+                <div id="share-step-3" class="hidden flex flex-col h-full">
+                     <div class="p-6 border-b border-slate-100 dark:border-slate-800 flex-shrink-0">
+                        <div class="flex items-center mb-4">
+                            <button onclick="goToShareStep2()" class="flex items-center text-sm font-bold text-slate-500 hover:text-indigo-600"><i data-lucide="arrow-left" class="w-4 h-4 mr-1"></i> Atrás</button>
+                        </div>
+                        <div class="text-center">
+                             <div class="w-16 h-16 bg-indigo-50 dark:bg-indigo-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4 text-indigo-600 dark:text-indigo-400">
+                                <i data-lucide="edit-3" class="w-8 h-8"></i>
+                            </div>
+                            <h2 class="text-xl font-bold text-slate-800 dark:text-white mb-2">Dale nombre a tu lista</h2>
+                            <p class="text-sm text-slate-500">Ej: "Favoritos de Madrid", "Ruta de Tacos"</p>
+                        </div>
+                    </div>
+
+                    <div class="p-8 flex-1 flex flex-col justify-center">
+                        <input type="text" id="share-list-name-input" placeholder="Escribe un nombre..." class="w-full p-4 text-lg text-center font-bold bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-2xl focus:border-indigo-500 focus:ring-0 outline-none text-slate-800 dark:text-white placeholder-slate-300">
+                    </div>
+
+                    <div class="p-6 border-t border-slate-100 dark:border-slate-800 flex-shrink-0">
+                        <button onclick="finalizeShare()" id="btn-generate-link" class="w-full bg-emerald-600 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-emerald-200 dark:shadow-none">
                             Generar Enlace <i data-lucide="link" class="w-4 h-4"></i>
                         </button>
                     </div>
@@ -479,8 +507,16 @@
         import { getFirestore, collection, addDoc, query, onSnapshot, serverTimestamp, deleteDoc, updateDoc, doc, getDoc, setDoc, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         // --- CONFIG ---
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const appId = 'restaurapp-web';
+        const firebaseConfig = {
+            apiKey: "AIzaSyCN6r1SI_546p7WdxxP28q3WAQWki7zkyI",
+            authDomain: "restaurapp-5fe96.firebaseapp.com",
+            projectId: "restaurapp-5fe96",
+            storageBucket: "restaurapp-5fe96.firebasestorage.app",
+            messagingSenderId: "612330319072",
+            appId: "1:612330319072:web:a85e321306dd2b4ea73485",
+            measurementId: "G-FC6RL56RNR"
+        };
         const apiKey = ""; 
 
         // Init Firebase
@@ -770,6 +806,7 @@
         window.goToShareStep1 = () => {
             document.getElementById('share-step-1').classList.remove('hidden');
             document.getElementById('share-step-2').classList.add('hidden');
+            document.getElementById('share-step-3').classList.add('hidden');
             document.getElementById('share-step-result').classList.add('hidden');
             
             const list = document.getElementById('share-cat-list');
@@ -812,6 +849,7 @@
         window.goToShareStep2 = () => {
             if (shareSelectedCats.length === 0) return alert("Selecciona al menos una categoría");
             document.getElementById('share-step-1').classList.add('hidden');
+            document.getElementById('share-step-3').classList.add('hidden');
             document.getElementById('share-step-2').classList.remove('hidden');
 
             const filteredPlaces = places.filter(p => shareSelectedCats.includes(p.type));
@@ -876,11 +914,20 @@
             goToShareStep2(); // Re-render to show changes
         }
 
+        window.goToShareStep3 = () => {
+             if (shareSelectedPlaces.length === 0) return alert("Selecciona al menos un sitio");
+             document.getElementById('share-step-2').classList.add('hidden');
+             document.getElementById('share-step-3').classList.remove('hidden');
+             // Focus on input
+             setTimeout(() => document.getElementById('share-list-name-input').focus(), 100);
+        }
+
         window.finalizeShare = async () => {
-            if (shareSelectedPlaces.length === 0) return alert("Selecciona al menos un sitio");
             const btn = document.getElementById('btn-generate-link');
             btn.innerHTML = `<i data-lucide="loader-2" class="animate-spin w-4 h-4"></i> Generando...`;
             lucide.createIcons();
+
+            const listName = document.getElementById('share-list-name-input').value.trim() || "Mis Favoritos";
 
             try {
                 const itemsToShare = places.filter(p => shareSelectedPlaces.includes(p.id));
@@ -888,7 +935,7 @@
                 
                 await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'shared_lists', shareId), {
                     items: itemsToShare,
-                    categoryName: "Selección Personalizada",
+                    categoryName: listName,
                     createdAt: serverTimestamp(),
                     owner: currentUser.uid
                 });
@@ -896,7 +943,7 @@
                 const shareUrl = `${window.location.href.split('?')[0]}?shared=${shareId}`;
                 document.getElementById('share-final-link').value = shareUrl;
                 
-                document.getElementById('share-step-2').classList.add('hidden');
+                document.getElementById('share-step-3').classList.add('hidden');
                 document.getElementById('share-step-result').classList.remove('hidden');
             } catch (e) {
                 console.error(e);
