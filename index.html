@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="es" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RestaurApp</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        indigo: { 50: '#eef2ff', 100: '#e0e7ff', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca', 900: '#312e81' },
+                        slate: { 850: '#1e293b', 900: '#0f172a', 950: '#020617' }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Estilos base -->
+    <style>
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        body { font-family: system-ui, -apple-system, sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 transition-colors duration-300 min-h-screen">
+
+    <!-- APP CONTAINER -->
+    <div id="app">
+        <!-- Loading Screen -->
+        <div id="loading-screen" class="fixed inset-0 flex items-center justify-center bg-slate-50 dark:bg-slate-950 z-50">
+            <div class="animate-spin text-indigo-600 dark:text-indigo-400">
+                <i data-lucide="loader-2" class="w-12 h-12"></i>
+            </div>
+        </div>
+
+        <!-- Login Screen -->
+        <div id="login-view" class="hidden min-h-screen flex items-center justify-center p-6 relative overflow-hidden">
+            <!-- Background Icons -->
+            <div class="absolute inset-0 opacity-10 dark:opacity-5 pointer-events-none">
+                <i data-lucide="utensils" class="absolute top-10 left-10 w-16 h-16 text-indigo-500"></i>
+                <i data-lucide="coffee" class="absolute bottom-20 right-10 w-12 h-12 text-emerald-500"></i>
+                <i data-lucide="star" class="absolute top-1/3 right-1/4 w-8 h-8 text-amber-500"></i>
+            </div>
+
+            <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl p-8 max-w-md w-full text-center relative z-10 border border-slate-100 dark:border-slate-800">
+                <div class="mx-auto w-20 h-20 bg-indigo-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg rotate-3">
+                    <i data-lucide="store" class="w-10 h-10 text-white"></i>
+                </div>
+                <h1 class="text-3xl font-black text-slate-800 dark:text-white mb-2">RestaurApp</h1>
+                <p class="text-slate-500 dark:text-slate-400 mb-8">Guarda tus rincones favoritos y descubre tu perfil foodie con IA.</p>
+
+                <button id="btn-google-login" class="w-full flex items-center justify-center gap-3 bg-white dark:bg-slate-800 text-slate-700 dark:text-white border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 py-3.5 rounded-xl font-bold shadow-sm mb-6 transition-all">
+                    <!-- Google SVG -->
+                    <svg class="w-5 h-5" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                    Continuar con Google
+                </button>
+
+                <div class="relative flex py-2 items-center">
+                    <div class="flex-grow border-t border-slate-200 dark:border-slate-700"></div>
+                    <span class="flex-shrink-0 mx-4 text-slate-400 text-xs">O también</span>
+                    <div class="flex-grow border-t border-slate-200 dark:border-slate-700"></div>
+                </div>
+
+                <button id="btn-guest-login" class="w-full flex items-center justify-center gap-2 mt-4 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 font-semibold text-sm transition-colors">
+                    <i data-lucide="user" class="w-4 h-4"></i> Entrar como Invitado
+                </button>
+            </div>
+        </div>
+
+        <!-- Main App View -->
+        <div id="main-view" class="hidden pb-24">
+            <!-- Header -->
+            <header class="p-4 sticky top-0 z-30 shadow-md bg-indigo-600 dark:bg-slate-900 text-white border-b dark:border-slate-800 transition-colors">
+                <div class="max-w-5xl mx-auto space-y-3">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <h1 class="text-xl font-bold flex items-center gap-2">
+                                <i data-lucide="store" class="text-indigo-200"></i> RestaurApp
+                            </h1>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <button id="btn-theme-toggle" class="p-2 rounded-full hover:bg-white/20 transition-colors">
+                                <i data-lucide="moon" id="icon-theme" class="w-5 h-5 text-indigo-100"></i>
+                            </button>
+                            <button id="btn-profile-ai" class="flex items-center gap-2 px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-full text-xs font-bold border border-white/20">
+                                <i data-lucide="pie-chart" class="w-4 h-4"></i> <span class="hidden sm:inline">Perfil IA</span>
+                            </button>
+                            <div class="flex items-center gap-2 pl-2 border-l border-white/20">
+                                <img id="user-avatar" src="" class="hidden w-8 h-8 rounded-full border border-white/50">
+                                <i id="user-icon-default" data-lucide="user-circle" class="w-7 h-7 text-indigo-100 hidden"></i>
+                                <button id="btn-logout" class="p-2 rounded-full hover:bg-red-500/20 text-red-100 hover:text-red-200">
+                                    <i data-lucide="log-out" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Search & Sort -->
+                    <div class="flex gap-2">
+                        <div class="relative flex-1">
+                            <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-indigo-200"></i>
+                            <input id="input-search" type="text" placeholder="Buscar..." class="w-full bg-indigo-700/50 dark:bg-slate-800/50 border border-indigo-500/50 dark:border-slate-600 rounded-xl pl-10 pr-10 py-2.5 text-sm text-white placeholder-indigo-200/60 focus:outline-none focus:ring-2 focus:ring-white/20">
+                            <button id="btn-clear-search" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-white/70 hover:text-white">
+                                <i data-lucide="x" class="w-3 h-3"></i>
+                            </button>
+                        </div>
+                        <div class="relative">
+                            <select id="select-sort" class="appearance-none h-full bg-indigo-700/50 dark:bg-slate-800/50 border border-indigo-500/50 dark:border-slate-600 text-white pl-3 pr-8 py-2.5 rounded-xl text-sm font-medium focus:outline-none cursor-pointer">
+                                <option class="text-slate-800" value="date-desc">📅 Recientes</option>
+                                <option class="text-slate-800" value="date-asc">📅 Antiguos</option>
+                                <option class="text-slate-800" value="rating-desc">⭐ Mejores</option>
+                                <option class="text-slate-800" value="rating-asc">⭐ Peores</option>
+                            </select>
+                            <i data-lucide="arrow-up-down" class="absolute right-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-indigo-200 pointer-events-none"></i>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Tabs -->
+            <div class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-[124px] z-20 overflow-x-auto scrollbar-hide">
+                <div id="categories-container" class="flex p-2 gap-2 max-w-5xl mx-auto min-w-max">
+                    <!-- Categories injected by JS -->
+                </div>
+            </div>
+
+            <!-- List -->
+            <main class="max-w-5xl mx-auto p-4">
+                <div id="places-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Places injected by JS -->
+                </div>
+                
+                <div id="empty-state" class="hidden text-center py-20 opacity-50 flex flex-col items-center">
+                    <i data-lucide="search" class="w-12 h-12 mb-4 text-slate-300 dark:text-slate-600"></i>
+                    <p class="text-lg">No se encontraron sitios.</p>
+                </div>
+            </main>
+
+            <!-- FAB -->
+            <button id="btn-fab" class="fixed bottom-6 right-6 bg-indigo-600 hover:bg-indigo-700 text-white p-4 rounded-full shadow-lg hover:scale-105 active:scale-95 transition-all z-40">
+                <i data-lucide="plus" class="w-7 h-7"></i>
+            </button>
+        </div>
+
+        <!-- MODAL: ADD/EDIT -->
+        <div id="modal-form" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+            <div class="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto flex flex-col">
+                <div class="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center sticky top-0 bg-white dark:bg-slate-900 z-10">
+                    <h2 id="modal-title" class="text-lg font-bold">Nuevo Sitio</h2>
+                    <button id="btn-close-modal" class="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full"><i data-lucide="x" class="w-6 h-6"></i></button>
+                </div>
+                <form id="place-form" class="p-6 space-y-5">
+                    <input type="hidden" id="edit-id">
+                    
+                    <!-- Main Image -->
+                    <div class="space-y-2">
+                        <label class="text-xs font-semibold text-slate-500 uppercase">Foto Portada</label>
+                        <div class="relative group h-48 w-full border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-xl overflow-hidden bg-slate-50 dark:bg-slate-800">
+                            <img id="preview-img-0" class="hidden w-full h-full object-cover">
+                            <div id="upload-placeholder-0" class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                                <i data-lucide="camera" class="w-8 h-8 text-slate-400 mb-2"></i>
+                                <span class="text-xs text-slate-500">Toca para agregar</span>
+                            </div>
+                            <input type="file" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer" onchange="handleImageUpload(this, 0)">
+                            <button type="button" id="btn-remove-img-0" class="hidden absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full z-20"><i data-lucide="x" class="w-4 h-4"></i></button>
+                            
+                            <!-- AI Analyze Button -->
+                            <button type="button" id="btn-analyze-ai" class="hidden absolute bottom-2 left-2 right-2 bg-indigo-600/90 text-white text-xs font-bold py-2 rounded-lg backdrop-blur-sm flex items-center justify-center gap-2 z-20">
+                                <i data-lucide="sparkles" class="w-3 h-3"></i> Analizar con IA
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="space-y-1">
+                            <label class="text-xs font-semibold text-slate-500 uppercase">Nombre</label>
+                            <input type="text" id="input-name" required class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-xs font-semibold text-slate-500 uppercase">Tipo</label>
+                            <select id="input-type" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                <!-- Options populated by JS -->
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="text-xs font-semibold text-slate-500 uppercase">Dirección</label>
+                        <div class="relative">
+                            <i data-lucide="map-pin" class="absolute left-3 top-3 w-4 h-4 text-slate-400"></i>
+                            <input type="text" id="input-address" class="w-full p-2.5 pl-10 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg">
+                        </div>
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="text-xs font-semibold text-slate-500 uppercase">Rating</label>
+                        <div class="flex items-center gap-2 bg-slate-50 dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-700 justify-center">
+                            <div id="star-rating-container" class="flex gap-1"></div>
+                            <span id="rating-value" class="font-bold ml-2">0/5</span>
+                        </div>
+                    </div>
+
+                    <!-- AI Tags Section -->
+                    <div class="bg-indigo-50 dark:bg-indigo-900/20 p-4 rounded-xl border border-indigo-100 dark:border-indigo-800/30">
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 class="text-sm font-bold text-indigo-800 dark:text-indigo-300 flex items-center gap-2">
+                                <i data-lucide="sparkles" class="w-3 h-3"></i> Sugerencias IA
+                            </h3>
+                            <button type="button" id="btn-generate-tags" class="text-[10px] bg-indigo-600 text-white px-3 py-1 rounded-full">Generar</button>
+                        </div>
+                        <div class="mb-2">
+                            <span class="text-xs font-bold text-green-600 block mb-1">LO BUENO</span>
+                            <div id="tags-good-container" class="flex flex-wrap gap-2"></div>
+                        </div>
+                        <div>
+                            <span class="text-xs font-bold text-red-600 block mb-1">LO MALO</span>
+                            <div id="tags-bad-container" class="flex flex-wrap gap-2"></div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-1">
+                        <div class="flex justify-between items-end mb-1">
+                            <label class="text-xs font-semibold text-slate-500 uppercase">Comentario</label>
+                            <button type="button" id="btn-enhance-comment" class="text-[10px] text-indigo-600 font-bold flex items-center gap-1">
+                                <i data-lucide="wand-2" class="w-3 h-3"></i> Mejorar
+                            </button>
+                        </div>
+                        <textarea id="input-comment" rows="3" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg"></textarea>
+                    </div>
+
+                    <button type="submit" class="w-full bg-indigo-600 text-white py-3.5 rounded-xl font-bold shadow-lg">Guardar Sitio</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- MODAL: DOMAIN ERROR -->
+        <div id="modal-domain-error" class="hidden fixed inset-0 bg-slate-900 p-6 z-[60] flex items-center justify-center">
+            <div class="bg-white dark:bg-slate-900 rounded-3xl p-8 max-w-lg w-full text-center border border-red-100 dark:border-red-900">
+                <div class="mx-auto w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mb-6">
+                    <i data-lucide="shield-alert" class="w-8 h-8"></i>
+                </div>
+                <h2 class="text-xl font-bold mb-4 dark:text-white">Dominio No Autorizado</h2>
+                <p class="text-sm text-slate-600 dark:text-slate-300 mb-6">
+                    Firebase ha bloqueado este dominio de vista previa. 
+                    <br><strong>Copia esta URL y agrégala en Auth > Settings > Domains:</strong>
+                </p>
+                <div class="bg-slate-100 dark:bg-slate-800 p-3 rounded-lg flex items-center gap-2 mb-6">
+                    <code id="domain-code" class="text-xs break-all flex-1 text-left font-mono">...</code>
+                    <button onclick="copyDomain()" class="p-2"><i data-lucide="copy" class="w-4 h-4"></i></button>
+                </div>
+                <div class="flex flex-col gap-3">
+                    <button onclick="retryLogin()" class="px-4 py-2 bg-indigo-600 text-white rounded-xl font-bold">Reintentar</button>
+                    <button onclick="forceGuestLogin()" class="px-4 py-2 border border-slate-300 dark:border-slate-700 rounded-xl text-sm font-bold dark:text-white">Modo Invitado (Saltar)</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL: PROFILE AI -->
+        <div id="modal-profile" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+            <div class="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-md shadow-2xl overflow-hidden relative">
+                <div class="bg-gradient-to-r from-indigo-500 to-purple-600 p-6 text-white text-center">
+                    <button onclick="document.getElementById('modal-profile').classList.add('hidden')" class="absolute top-4 right-4"><i data-lucide="x" class="w-5 h-5"></i></button>
+                    <div class="mx-auto w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mb-4"><i data-lucide="sparkles" class="w-8 h-8 text-yellow-300"></i></div>
+                    <h2 class="text-2xl font-bold">Tu Perfil Foodie</h2>
+                </div>
+                <div id="profile-content" class="p-6 text-center space-y-4">
+                    <!-- Content injected -->
+                    <div class="animate-pulse">Analizando tus gustos...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- HIDDEN INPUTS FOR EXTRA IMAGES (Simplified logic) -->
+        <input type="file" id="file-input-hidden" class="hidden" accept="image/*">
+
+    </div> <!-- End App -->
+
+    <!-- LOGIC SCRIPTS -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, query, onSnapshot, serverTimestamp, deleteDoc, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // --- CONFIG ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyCN6r1SI_546p7WdxxP28q3WAQWki7zkyI",
+            authDomain: "restaurapp-5fe96.firebaseapp.com",
+            projectId: "restaurapp-5fe96",
+            storageBucket: "restaurapp-5fe96.firebasestorage.app",
+            messagingSenderId: "612330319072",
+            appId: "1:612330319072:web:a85e321306dd2b4ea73485",
+            measurementId: "G-FC6RL56RNR"
+        };
+        const appId = 'default-app-id'; // Simplified context
+        const apiKey = ""; // Gemini API Key (Empty per instructions)
+
+        // Init Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // State
+        let currentUser = null;
+        let places = [];
+        let currentSort = 'date-desc';
+        let currentFilter = 'all';
+        let currentSearch = '';
+        let editingPlaceId = null;
+        let formData = {
+            name: '', type: 'Restaurante', address: '', date: new Date().toISOString().split('T')[0],
+            rating: 0, comment: '', goodTags: [], badTags: [], images: ['', '', '']
+        };
+        const defaultCategories = [
+            {id: 'all', label: 'Todos', icon: 'filter'},
+            {id: 'Restaurante', label: 'Restaurantes', icon: 'utensils'},
+            {id: 'FoodTruck', label: 'Food Trucks', icon: 'truck'},
+            {id: 'Bar', label: 'Bares', icon: 'music'},
+            {id: 'Cafeteria', label: 'Café', icon: 'coffee'},
+            {id: 'Entretenimiento', label: 'Ocio', icon: 'tree-pine'}
+        ];
+
+        // --- AUTH ---
+        onAuthStateChanged(auth, (user) => {
+            const loading = document.getElementById('loading-screen');
+            const loginView = document.getElementById('login-view');
+            const mainView = document.getElementById('main-view');
+            
+            if (user) {
+                currentUser = user;
+                loginView.classList.add('hidden');
+                mainView.classList.remove('hidden');
+                setupRealtimeListener();
+                updateUserHeader();
+            } else {
+                currentUser = null;
+                loginView.classList.remove('hidden');
+                mainView.classList.add('hidden');
+            }
+            loading.classList.add('hidden');
+        });
+
+        window.retryLogin = handleGoogleLogin;
+        window.forceGuestLogin = () => {
+            document.getElementById('modal-domain-error').classList.add('hidden');
+            signInAnonymously(auth).catch(err => alert("Error invitado: " + err.message));
+        };
+
+        async function handleGoogleLogin() {
+            document.getElementById('modal-domain-error').classList.add('hidden');
+            const provider = new GoogleAuthProvider();
+            try {
+                await signInWithPopup(auth, provider);
+            } catch (error) {
+                console.error("Auth Error", error);
+                const errStr = (error.code + error.message).toLowerCase();
+                if (errStr.includes('unauthorized-domain')) {
+                    const domain = window.location.hostname;
+                    document.getElementById('domain-code').innerText = domain;
+                    document.getElementById('modal-domain-error').classList.remove('hidden');
+                } else if (!errStr.includes('closed-by-user')) {
+                    alert("Error login: " + error.message);
+                }
+            }
+        }
+
+        document.getElementById('btn-google-login').addEventListener('click', handleGoogleLogin);
+        document.getElementById('btn-guest-login').addEventListener('click', () => signInAnonymously(auth));
+        document.getElementById('btn-logout').addEventListener('click', () => signOut(auth));
+
+        function updateUserHeader() {
+            const img = document.getElementById('user-avatar');
+            const icon = document.getElementById('user-icon-default');
+            if (currentUser && currentUser.photoURL) {
+                img.src = currentUser.photoURL;
+                img.classList.remove('hidden');
+                icon.classList.add('hidden');
+            } else {
+                img.classList.add('hidden');
+                icon.classList.remove('hidden');
+            }
+        }
+
+        // --- FIRESTORE ---
+        function setupRealtimeListener() {
+            if (!currentUser) return;
+            const q = query(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'places'));
+            onSnapshot(q, (snapshot) => {
+                places = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderPlaces();
+            });
+        }
+
+        // --- GEMINI API ---
+        async function callGemini(prompt, imageBase64) {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+            const parts = [{ text: prompt }];
+            if (imageBase64) {
+                const b64 = imageBase64.split(',')[1] || imageBase64;
+                parts.push({ inlineData: { mimeType: "image/jpeg", data: b64 } });
+            }
+            try {
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ contents: [{ parts }] })
+                });
+                const data = await res.json();
+                return data.candidates?.[0]?.content?.parts?.[0]?.text;
+            } catch (e) { console.error(e); return null; }
+        }
+
+        // --- UI RENDERING ---
+        function renderCategories() {
+            const container = document.getElementById('categories-container');
+            container.innerHTML = defaultCategories.map(cat => `
+                <button onclick="setCategory('${cat.id}')" 
+                    class="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors
+                    ${currentFilter === cat.id ? 'bg-indigo-100 text-indigo-700 border-indigo-200 dark:bg-indigo-900/50 dark:text-indigo-300 dark:border-indigo-800 border' : 'text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'}">
+                    <i data-lucide="${cat.icon}" class="w-4 h-4"></i> ${cat.label}
+                </button>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        window.setCategory = (id) => { currentFilter = id; renderCategories(); renderPlaces(); };
+
+        function renderPlaces() {
+            const grid = document.getElementById('places-grid');
+            const empty = document.getElementById('empty-state');
+            
+            let filtered = places.filter(p => {
+                const matchCat = currentFilter === 'all' || p.type === currentFilter;
+                const searchLower = currentSearch.toLowerCase();
+                const matchSearch = !currentSearch || 
+                    p.name.toLowerCase().includes(searchLower) || 
+                    p.address?.toLowerCase().includes(searchLower);
+                return matchCat && matchSearch;
+            });
+
+            // Sort
+            filtered.sort((a, b) => {
+                if (sortOption === 'date-desc') return new Date(b.date) - new Date(a.date);
+                if (sortOption === 'date-asc') return new Date(a.date) - new Date(b.date);
+                if (sortOption === 'rating-desc') return b.rating - a.rating;
+                return a.rating - b.rating;
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = '';
+                empty.classList.remove('hidden');
+                return;
+            }
+
+            empty.classList.add('hidden');
+            grid.innerHTML = filtered.map(p => {
+                const img = (p.images && p.images[0]) ? p.images[0] : null;
+                const goodTags = (p.goodTags || []).slice(0, 2);
+                
+                return `
+                <div onclick="openEdit('${p.id}')" class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200/60 dark:border-slate-800 overflow-hidden group cursor-pointer relative hover:-translate-y-1 transition-transform">
+                    <div class="h-48 w-full bg-slate-100 dark:bg-slate-800 relative overflow-hidden">
+                        ${img ? `<img src="${img}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">` : 
+                        `<div class="w-full h-full flex items-center justify-center text-slate-300"><i data-lucide="image" class="w-10 h-10"></i></div>`}
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent"></div>
+                        <div class="absolute top-3 left-3 px-2 py-1 bg-white/90 dark:bg-slate-900/90 backdrop-blur rounded text-[10px] font-bold uppercase">${p.type}</div>
+                        <div class="absolute top-3 right-3 flex items-center gap-1 bg-white/90 dark:bg-slate-900/90 backdrop-blur px-2 py-1 rounded-full text-xs font-bold">
+                            <i data-lucide="star" class="w-3 h-3 text-amber-400 fill-amber-400"></i> ${p.rating}
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-bold text-lg leading-tight mb-1 dark:text-white">${p.name}</h3>
+                        <div class="flex items-center text-xs text-slate-400 mb-3">
+                            <i data-lucide="calendar" class="w-3 h-3 mr-1"></i> ${new Date(p.date).toLocaleDateString()}
+                        </div>
+                        ${p.comment ? `<p class="text-xs text-slate-600 dark:text-slate-400 italic line-clamp-2 mb-3">"${p.comment}"</p>` : ''}
+                        <div class="flex gap-1 overflow-hidden">
+                            ${goodTags.map(t => `<span class="px-2 py-0.5 bg-green-50 text-green-700 text-[10px] font-bold rounded border border-green-100 whitespace-nowrap">${t}</span>`).join('')}
+                        </div>
+                    </div>
+                    <button onclick="event.stopPropagation(); deletePlace('${p.id}')" class="absolute top-14 right-3 p-2 bg-white text-red-500 rounded-full shadow hover:bg-red-50 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </button>
+                </div>
+                `;
+            }).join('');
+            lucide.createIcons();
+        }
+
+        // --- FORM LOGIC ---
+        const modal = document.getElementById('modal-form');
+        const form = document.getElementById('place-form');
+
+        // Populate Type Select
+        const typeSelect = document.getElementById('input-type');
+        typeSelect.innerHTML = defaultCategories.filter(c => c.id !== 'all').map(c => `<option value="${c.id}">${c.label}</option>`).join('');
+
+        // Star Rating Logic
+        function renderStars(rating) {
+            const container = document.getElementById('star-rating-container');
+            container.innerHTML = [1,2,3,4,5].map(i => `
+                <button type="button" onclick="setRating(${i})" class="focus:outline-none transition-transform hover:scale-110">
+                    <i data-lucide="star" class="w-8 h-8 ${i <= rating ? 'text-amber-400 fill-amber-400' : 'text-slate-300 dark:text-slate-700'}"></i>
+                </button>
+            `).join('');
+            document.getElementById('rating-value').innerText = `${rating}/5`;
+            lucide.createIcons();
+        }
+        window.setRating = (r) => { formData.rating = r; renderStars(r); };
+
+        // Tags Logic
+        function renderFormTags() {
+            const goodC = document.getElementById('tags-good-container');
+            const badC = document.getElementById('tags-bad-container');
+            
+            const renderTag = (t, type) => `
+                <button type="button" onclick="toggleFormTag('${t}', '${type}')" 
+                    class="text-xs px-3 py-1 rounded-full border transition-all ${
+                        (type === 'good' ? formData.goodTags : formData.badTags).includes(t) 
+                        ? (type === 'good' ? 'bg-green-600 text-white border-green-600' : 'bg-red-600 text-white border-red-600') 
+                        : 'bg-white dark:bg-slate-800 text-slate-500 border-slate-200'
+                    }">
+                    ${t}
+                </button>
+            `;
+            // Normally would load suggestions from AI, simplified here to show selected
+            goodC.innerHTML = formData.goodTags.map(t => renderTag(t, 'good')).join('');
+            badC.innerHTML = formData.badTags.map(t => renderTag(t, 'bad')).join('');
+        }
+        window.toggleFormTag = (t, type) => {
+            const arr = type === 'good' ? formData.goodTags : formData.badTags;
+            const idx = arr.indexOf(t);
+            if (idx > -1) arr.splice(idx, 1); else arr.push(t);
+            renderFormTags();
+        }
+
+        // Open/Close
+        document.getElementById('btn-fab').onclick = () => {
+            editingPlaceId = null;
+            formData = { name: '', type: 'Restaurante', address: '', date: new Date().toISOString().split('T')[0], rating: 0, comment: '', goodTags: [], badTags: [], images: ['', '', ''] };
+            document.getElementById('modal-title').innerText = 'Nuevo Sitio';
+            document.getElementById('edit-id').value = '';
+            fillForm();
+            modal.classList.remove('hidden');
+        };
+        
+        window.openEdit = (id) => {
+            const p = places.find(x => x.id === id);
+            if (!p) return;
+            editingPlaceId = id;
+            formData = { ...p, images: p.images || ['', '', ''] };
+            document.getElementById('modal-title').innerText = 'Editar Sitio';
+            document.getElementById('edit-id').value = id;
+            fillForm();
+            modal.classList.remove('hidden');
+        }
+
+        document.getElementById('btn-close-modal').onclick = () => modal.classList.add('hidden');
+
+        function fillForm() {
+            document.getElementById('input-name').value = formData.name;
+            document.getElementById('input-type').value = formData.type;
+            document.getElementById('input-address').value = formData.address || '';
+            document.getElementById('input-comment').value = formData.comment || '';
+            setRating(formData.rating);
+            renderFormTags();
+            updateImagePreview(0);
+            
+            // Show/Hide AI Analyze button based on image presence
+            if (formData.images[0]) {
+                document.getElementById('btn-analyze-ai').classList.remove('hidden');
+            } else {
+                document.getElementById('btn-analyze-ai').classList.add('hidden');
+            }
+        }
+
+        // Image Handling
+        window.handleImageUpload = async (input, idx) => {
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    formData.images[idx] = e.target.result; // Should use compression in prod
+                    updateImagePreview(idx);
+                    if (idx === 0) document.getElementById('btn-analyze-ai').classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+
+        function updateImagePreview(idx) {
+            const img = document.getElementById(`preview-img-${idx}`);
+            const ph = document.getElementById(`upload-placeholder-${idx}`);
+            const btn = document.getElementById(`btn-remove-img-${idx}`);
+            
+            if (formData.images[idx]) {
+                img.src = formData.images[idx];
+                img.classList.remove('hidden');
+                ph.classList.add('hidden');
+                btn.classList.remove('hidden');
+            } else {
+                img.classList.add('hidden');
+                ph.classList.remove('hidden');
+                btn.classList.add('hidden');
+            }
+        }
+        
+        document.getElementById('btn-remove-img-0').onclick = () => {
+            formData.images[0] = '';
+            updateImagePreview(0);
+            document.getElementById('btn-analyze-ai').classList.add('hidden');
+        };
+
+        // Submit
+        form.onsubmit = async (e) => {
+            e.preventDefault();
+            if (!currentUser) return;
+            
+            formData.name = document.getElementById('input-name').value;
+            formData.type = document.getElementById('input-type').value;
+            formData.address = document.getElementById('input-address').value;
+            formData.comment = document.getElementById('input-comment').value;
+
+            try {
+                if (editingPlaceId) {
+                    await updateDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'places', editingPlaceId), formData);
+                } else {
+                    await addDoc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'places'), {
+                        ...formData,
+                        createdAt: serverTimestamp()
+                    });
+                }
+                modal.classList.add('hidden');
+            } catch (err) { alert("Error guardando: " + err.message); }
+        };
+
+        window.deletePlace = async (id) => {
+            if (confirm("¿Borrar este sitio?")) {
+                try {
+                    await deleteDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'places', id));
+                } catch (err) { console.error(err); }
+            }
+        };
+
+        // --- AI FEATURES ---
+        document.getElementById('btn-analyze-ai').onclick = async () => {
+            const btn = document.getElementById('btn-analyze-ai');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = `<i data-lucide="loader-2" class="animate-spin w-3 h-3"></i> Analizando...`;
+            lucide.createIcons();
+            
+            try {
+                const prompt = `Analiza esta imagen de restaurante/comida. Devuelve SOLO un JSON: { "name": "posible nombre o null", "type": "Restaurante/Bar/Cafeteria", "rating": 4, "goodTags": ["tag1", "tag2"], "comment": "breve descripcion visual" }`;
+                const jsonStr = await callGemini(prompt, formData.images[0]);
+                const data = JSON.parse(jsonStr.replace(/```json|```/g, '').trim());
+                
+                if (data.name) document.getElementById('input-name').value = data.name;
+                if (data.type) document.getElementById('input-type').value = data.type;
+                if (data.rating) setRating(data.rating);
+                if (data.comment) document.getElementById('input-comment').value = data.comment;
+                if (data.goodTags) {
+                    formData.goodTags = data.goodTags;
+                    renderFormTags();
+                }
+            } catch (e) { alert("No se pudo analizar la imagen."); }
+            btn.innerHTML = originalText;
+            lucide.createIcons();
+        };
+
+        document.getElementById('btn-generate-tags').onclick = async () => {
+            const name = document.getElementById('input-name').value;
+            const type = document.getElementById('input-type').value;
+            if (!name) return alert("Escribe un nombre primero");
+            
+            const btn = document.getElementById('btn-generate-tags');
+            btn.innerText = "...";
+            try {
+                const res = await callGemini(`Genera 3 tags buenos y 3 malos cortos para "${name}" (${type}). JSON: {"good": [], "bad": []}`);
+                const data = JSON.parse(res.replace(/```json|```/g, '').trim());
+                formData.goodTags = data.good;
+                formData.badTags = data.bad;
+                renderFormTags();
+            } catch(e) {}
+            btn.innerText = "Generar";
+        };
+
+        document.getElementById('btn-enhance-comment').onclick = async () => {
+            const txt = document.getElementById('input-comment');
+            if (txt.value.length < 5) return;
+            const res = await callGemini(`Mejora esta reseña de restaurante para que suene profesional y divertida: "${txt.value}"`);
+            if (res) txt.value = res.trim();
+        };
+
+        document.getElementById('btn-profile-ai').onclick = async () => {
+            const modalP = document.getElementById('modal-profile');
+            const content = document.getElementById('profile-content');
+            modalP.classList.remove('hidden');
+            
+            if (places.length === 0) {
+                content.innerHTML = "Agrega sitios para generar tu perfil.";
+                return;
+            }
+
+            const history = places.map(p => `${p.name} (${p.type}, ${p.rating}*)`).join(", ");
+            const res = await callGemini(`Genera perfil foodie breve basado en: ${history}. HTML simple con <h3>Titulo</h3> y <p>Descripcion</p> y <p><strong>Recomendación:</strong> ...</p>`);
+            content.innerHTML = res || "Error generando perfil.";
+        };
+
+        // --- MISC ---
+        document.getElementById('btn-theme-toggle').onclick = () => {
+            document.documentElement.classList.toggle('dark');
+            const isDark = document.documentElement.classList.contains('dark');
+            document.getElementById('icon-theme').setAttribute('data-lucide', isDark ? 'sun' : 'moon');
+            lucide.createIcons();
+        };
+
+        document.getElementById('input-search').oninput = (e) => {
+            currentSearch = e.target.value;
+            document.getElementById('btn-clear-search').classList.toggle('hidden', !currentSearch);
+            renderPlaces();
+        };
+        document.getElementById('btn-clear-search').onclick = () => {
+            document.getElementById('input-search').value = '';
+            currentSearch = '';
+            document.getElementById('btn-clear-search').classList.add('hidden');
+            renderPlaces();
+        };
+        
+        document.getElementById('select-sort').onchange = (e) => {
+            window.sortOption = e.target.value; // Store in window or state variable
+            renderPlaces();
+        };
+
+        window.copyDomain = () => {
+            navigator.clipboard.writeText(document.getElementById('domain-code').innerText);
+            alert("Dominio copiado. Agrégalo en Firebase Console.");
+        };
+
+        // Init
+        renderCategories();
+        lucide.createIcons();
+
+    </script>
+</body>
+</html>
